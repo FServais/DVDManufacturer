@@ -9,8 +9,14 @@
 package info0045;
 
 import java.io.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+
 import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+
 import java.lang.StringBuilder;
 
 public class DVDManufacturer{
@@ -37,15 +43,15 @@ public class DVDManufacturer{
             StringBuilder sb = new StringBuilder();
             int inchar;
             while((inchar = fin.read()) != -1){
-                sb.append(inchar);
+                sb.append((char)inchar);
                 fout.write(inchar);
             }
 
             String content = sb.toString();
 
-            long[] coverKeys = new KeyTree().getCoverSet(revocationList);
+            long[] idsCover = new KeyTree().getCoverSet(revocationList);
 
-            String encryptedContent = encrypt(content, coverKeys);            
+            String encryptedContent = encrypt(content, idsCover);            
             
             fin.close();
             fout.close();
@@ -120,10 +126,85 @@ public class DVDManufacturer{
      */
     private String encrypt(String content, long[] coverKeys){
         // Generation of K_t
-        KeyGenerator kg = KeyGenerator.getInstance("AES");
-        kg.init(256);
+        KeyGenerator kg = null;
+		try {
+			kg = KeyGenerator.getInstance("AES");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+        kg.init(128);
 
-        SecretKey key = kg.generateKey();
+        SecretKey kt = kg.generateKey();
+        if(kt != null)
+        	System.out.println("Key : " + Base64.getEncoder().encodeToString(kt.getEncoded()));
+
+        Cipher cipher = null;
+        try {
+        	// Encryption
+			cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+			cipher.init(Cipher.ENCRYPT_MODE, kt);
+			byte[] IV = cipher.getIV();
+			System.out.println("IV : " + Base64.getEncoder().encodeToString(IV));
+			
+			byte[] encryptedBytes = cipher.doFinal(content.getBytes());
+			
+			System.out.println("Encrypted : " + Base64.getEncoder().encodeToString(encryptedBytes));
+			
+			/* ================ DEBUG =============== */
+			/*
+			 try{
+		            FileOutputStream fout = new FileOutputStream("encoded.enc");
+		            fout.write(encryptedBytes);
+		            fout.close();
+		          
+		     }catch( Exception e ){
+		    	 e.printStackTrace();
+		     }
+			 
+			 byte[] filecontent = null;
+			 try{
+				 	File file = new File("encoded.enc");
+		            FileInputStream fin = new FileInputStream(file);
+		            
+		            filecontent = new byte[(int)file.length()];
+		            
+		            fin.read(filecontent);
+		            
+		            fin.close();
+		          
+		     }catch( Exception e ){
+		    	 e.printStackTrace();
+		     }
+			
+			 encryptedBytes = filecontent;
+			 
+			// DECRYPT
+			cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+			cipher.init(Cipher.DECRYPT_MODE, kt, new IvParameterSpec(IV));
+			
+			System.out.println("Plain text : " + new String(cipher.doFinal(encryptedBytes), "UTF-8"));
+			*/
+			/* ================ END DEBUG =============== */
+			
+			ArrayList<byte[]> keyEncryptions = new ArrayList<byte[]>();
+			
+			for(long keyToEncrypt : coverKeys){
+				
+			}
+			
+			
+			
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+        
+        
+        
+        
+		return content;
     }
 
 }//end class

@@ -13,7 +13,7 @@ public class Main {
 		try {
 			String content = "azertyuiop";
 			
-			Mac mac = Mac.getInstance("HmacSHA1");
+			Mac mac = Mac.getInstance("HmacSHA512");
 			SecretKeySpec secret = new SecretKeySpec("password".getBytes(), mac.getAlgorithm());
 			mac.init(secret);
 			
