@@ -49,9 +49,9 @@ public class DVDManufacturer{
 
             String content = sb.toString();
 
-            long[] coverKeys = new KeyTree().getCoverSet(revocationList);
+            long[] idsCover = new KeyTree().getCoverSet(revocationList);
 
-            String encryptedContent = encrypt(content, coverKeys);            
+            String encryptedContent = encrypt(content, idsCover);            
             
             fin.close();
             fout.close();
