@@ -9,6 +9,7 @@ package info0045;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -70,12 +71,12 @@ public class PlayerKeys{
                
             }//end for - i
             
-			SecretKeySpec sec = new SecretKeySpec(passwd.getBytes(), "AES");
-			SecretKeyFactory sfkey = SecretKeyFactory.getInstance("AES");
-			SecretKey secretKey = sfkey.generateSecret(sec);
+            byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
+            Key sec = new SecretKeySpec(pass, "AES");
+
 			
 			Cipher AesCipher = Cipher.getInstance("AES");
-            AesCipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            AesCipher.init(Cipher.ENCRYPT_MODE, sec);
             byte[] byteCipherText = AesCipher.doFinal(keys.getBytes());
 
             
