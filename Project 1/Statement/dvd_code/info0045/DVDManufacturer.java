@@ -10,6 +10,8 @@ package info0045;
 
 import java.io.*;
 import java.util.*;
+import javax.crypto.*;
+import java.lang.StringBuilder;
 
 public class DVDManufacturer{
     
@@ -32,14 +34,23 @@ public class DVDManufacturer{
             FileInputStream fin = new FileInputStream(contentFilename);
             FileOutputStream fout = new FileOutputStream(encFilename);
             
+            StringBuilder sb = new StringBuilder();
             int inchar;
-            while((inchar = fin.read()) != -1)
+            while((inchar = fin.read()) != -1){
+                sb.append(inchar);
                 fout.write(inchar);
+            }
+
+            String content = sb.toString();
+
+            long[] coverKeys = new KeyTree().getCoverSet(revocationList);
+
+            String encryptedContent = encrypt(content, coverKeys);            
             
             fin.close();
             fout.close();
             
-            new File(contentFilename).delete();
+            //new File(contentFilename).delete();
             
         }catch( Exception e ){
             e.printStackTrace();
@@ -62,7 +73,7 @@ public class DVDManufacturer{
             String contentFile = args[2];
             
             long[] revList = parseRevocationFile();
-            
+
             DVDManufacturer manu = new DVDManufacturer();
             
             manu.encryptContent(title, contentFile, revList);
@@ -74,7 +85,6 @@ public class DVDManufacturer{
     // Parses the revocation file, assumed to be at revoke.lst
     // The format is just text integer player ids separated by newlines
     private static long[] parseRevocationFile(){
-        
         try{
             ArrayList<Long> revoked = new ArrayList<Long>();
             
@@ -100,4 +110,20 @@ public class DVDManufacturer{
     private static String getOutputFilename(String filename){
         return filename + ".enc";
     }//end getOutputFileName();
+
+
+    /**
+     * Function that encrypt a content using a set of keys. One of the keys is need to decrypt this content.
+     * @param  content   Content to encrypt.
+     * @param  coverKeys Set of keys that will encrypt the content.
+     * @return           Encrypted content, in the form header||encrypted content.
+     */
+    private String encrypt(String content, long[] coverKeys){
+        // Generation of K_t
+        KeyGenerator kg = KeyGenerator.getInstance("AES");
+        kg.init(256);
+
+        SecretKey key = kg.generateKey();
+    }
+
 }//end class
