@@ -33,7 +33,7 @@ public class DVDManufacturer{
     // file and deletes the original content file. Your output file
     // should be named by a call to getOutputFilename.
     public void encryptContent( String title, String contentFilename,
-                               long [] revocationList ){
+                               long [] revocationList, String aacsPasswd){
         
         String encFilename = getOutputFilename(contentFilename);
         
@@ -52,7 +52,7 @@ public class DVDManufacturer{
 
             long[] idsCover = new KeyTree().getCoverSet(revocationList);
             
-            String encryptedContent = encrypt(title, content, idsCover);            
+            String encryptedContent = encrypt(title, content, idsCover, aacsPasswd);            
             
             fin.close();
             fout.close();
@@ -83,7 +83,7 @@ public class DVDManufacturer{
 
             DVDManufacturer manu = new DVDManufacturer();
             
-            manu.encryptContent(title, contentFile, revList);
+            manu.encryptContent(title, contentFile, revList, aacsPwd);
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -125,7 +125,7 @@ public class DVDManufacturer{
      * @param  coverKeys Set of keys that will encrypt the content.
      * @return           Encrypted content, in the form header||encrypted content.
      */
-    private String encrypt(String content_title, String content, long[] coverIds){
+    private String encrypt(String content_title, String content, long[] coverIds, String aacsPasswd){
     	StringBuilder header = new StringBuilder();
     	
         /* 
@@ -196,9 +196,6 @@ public class DVDManufacturer{
 			PlayerKeys pk = new PlayerKeys();
 			HashMap<Long, byte[]> setKeys = new HashMap<Long, byte[]>();
 			
-			// TEMP
-			String aacsPasswd = "temp";
-			
 			for(long id : coverIds)
 				setKeys.put(id, pk.generateKey(id, aacsPasswd));
 			
@@ -208,10 +205,17 @@ public class DVDManufacturer{
              *		Encrypt K_enc with set of keys
              * ==========================================
              */
-			ArrayList encryptionsKEnc = new ArrayList<byte[]>();
-			for(byte[] key : setKeys){
+			HashMap<Long, byte[]> encryptionsKt = new HashMap<Long, byte[]>();
+			Iterator it = setKeys.entrySet().iterator();
+			
+			Cipher keyCipher = Cipher.getInstance("AES");
+			while(it.hasNext()){
+				Map.Entry<Long, byte[]> pair = (Map.Entry<Long, byte[]>)it.next();
+				keyCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(pair.getValue(), "AES"));
 				
+				encryptionsKt.put(pair.getKey(), cipher.doFinal());
 			}
+			
 			
 			
 			
@@ -290,6 +294,7 @@ public class DVDManufacturer{
 			return null;
 		}    
     }
+    
     
     private byte[] deriveKeyMac(byte[] kt){
     	SecretKeySpec ktSpec = new SecretKeySpec(kt, "HmacSHA1");
