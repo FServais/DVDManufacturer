@@ -16,6 +16,7 @@ import java.util.*;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import java.lang.StringBuilder;
 
@@ -50,8 +51,8 @@ public class DVDManufacturer{
             String content = sb.toString();
 
             long[] idsCover = new KeyTree().getCoverSet(revocationList);
-
-            String encryptedContent = encrypt(content, idsCover);            
+            
+            String encryptedContent = encrypt(title, content, idsCover);            
             
             fin.close();
             fout.close();
@@ -124,32 +125,82 @@ public class DVDManufacturer{
      * @param  coverKeys Set of keys that will encrypt the content.
      * @return           Encrypted content, in the form header||encrypted content.
      */
-    private String encrypt(String content, long[] coverKeys){
-        // Generation of K_t
+    private String encrypt(String content_title, String content, long[] coverIds){
+    	StringBuilder header = new StringBuilder();
+    	
+        /* 
+         * ==========================================
+         *			 Generation of K_t
+         * ==========================================
+         */
         KeyGenerator kg = null;
 		try {
-			kg = KeyGenerator.getInstance("AES");
+			kg = KeyGenerator.getInstance("HmacSHA256");
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 			return null;
 		}
-        kg.init(128);
+        //kg.init(256);
 
         SecretKey kt = kg.generateKey();
         if(kt != null)
-        	System.out.println("Key : " + Base64.getEncoder().encodeToString(kt.getEncoded()));
-
-        Cipher cipher = null;
+        	System.out.println("Key : " + Base64.getEncoder().encodeToString(kt.getEncoded()) + " : (" + kt.getEncoded().length + " Bytes)");
+        
+        byte[] ktBytes = kt.getEncoded(); 
+        SecretKeySpec ktSpec = new SecretKeySpec(ktBytes, "HmacSHA1");
+        
         try {
-        	// Encryption
-			cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, kt);
+        	/* 
+             * ==========================================
+             *			 Generation of K_enc
+             * ==========================================
+             */
+	        Mac mac = Mac.getInstance("HmacMD5");
+	        mac.init(ktSpec);
+
+	        byte[] kEnc = mac.doFinal("enc".getBytes()); // K_enc = HMAC(K_t, "enc")
+	        SecretKey kEncSpec = new SecretKeySpec(kEnc, "AES");
+	        
+	        
+	        /* 
+             * ==========================================
+             *			 Generation of K_mac
+             * ==========================================
+             */
+            
+	        mac = Mac.getInstance("HmacSHA1");
+	        mac.init(ktSpec);
+
+	        byte[] kMac = mac.doFinal("mac".getBytes()); // K_mac = HMAC(K_t, "mac")
+	        System.out.println("Length of K_mac = " + kMac.length);
+	        
+	        
+	        /* 
+             * ==========================================
+             *			 Encryption of the content
+             * ==========================================
+             */
+	        
+	        Cipher cipher = null;
+        	cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+			cipher.init(Cipher.ENCRYPT_MODE, kEncSpec);
+			
 			byte[] IV = cipher.getIV();
 			System.out.println("IV : " + Base64.getEncoder().encodeToString(IV));
 			
 			byte[] encryptedBytes = cipher.doFinal(content.getBytes());
 			
-			System.out.println("Encrypted : " + Base64.getEncoder().encodeToString(encryptedBytes));
+			System.out.println("Encrypted content : " + Base64.getEncoder().encodeToString(encryptedBytes));
+			
+			
+			/* 
+             * ==========================================
+             *			Translate nodes to keys
+             * ==========================================
+             */
+			
+			
+			
 			
 			/* ================ DEBUG =============== */
 			/*
@@ -179,20 +230,24 @@ public class DVDManufacturer{
 			
 			 encryptedBytes = filecontent;
 			 
-			// DECRYPT
-			cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-			cipher.init(Cipher.DECRYPT_MODE, kt, new IvParameterSpec(IV));
 			
-			System.out.println("Plain text : " + new String(cipher.doFinal(encryptedBytes), "UTF-8"));
 			*/
 			/* ================ END DEBUG =============== */
-			
-			ArrayList<byte[]> keyEncryptions = new ArrayList<byte[]>();
-			
-			for(long keyToEncrypt : coverKeys){
-				
+			// DECRYPT
+			cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+			try {
+				cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(IV));
+			} catch (InvalidAlgorithmParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
+			try {
+				System.out.println("Plain text : " + new String(cipher.doFinal(encryptedBytes), "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
