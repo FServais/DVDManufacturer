@@ -9,19 +9,20 @@
 package info0045;
 
 import java.io.*;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 import java.lang.StringBuilder;
 
 public class DVDManufacturer{
-    
+	
+	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+	
     private final static String revocationFilename = "revoke.lst";
     
     public DVDManufacturer(){
@@ -45,7 +46,6 @@ public class DVDManufacturer{
             int inchar;
             while((inchar = fin.read()) != -1){
                 sb.append((char)inchar);
-                fout.write(inchar);
             }
 
             String content = sb.toString();
@@ -53,6 +53,8 @@ public class DVDManufacturer{
             long[] idsCover = new KeyTree().getCoverSet(revocationList);
             
             String encryptedContent = encrypt(title, content, idsCover, aacsPasswd);            
+            
+            fout.write(encryptedContent.getBytes());
             
             fin.close();
             fout.close();
@@ -84,6 +86,26 @@ public class DVDManufacturer{
             DVDManufacturer manu = new DVDManufacturer();
             
             manu.encryptContent(title, contentFile, revList, aacsPwd);
+            
+            /* ======== DEBUG ======== */
+            
+            File file = new File("content.txt.enc");
+            FileInputStream fis = new FileInputStream(file);
+            
+            
+            StringBuilder sb = new StringBuilder();
+            int inchar;
+            while((inchar = fis.read()) != -1){
+                sb.append((char)inchar);
+            }
+            
+            fis.close();
+            
+            System.out.println(sb);
+            
+            
+            /* ======== DEBUG ======== */
+            
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -126,30 +148,20 @@ public class DVDManufacturer{
      * @return           Encrypted content, in the form header||encrypted content.
      */
     private String encrypt(String content_title, String content, long[] coverIds, String aacsPasswd){
-    	StringBuilder header = new StringBuilder();
-    	
-        /* 
-         * ==========================================
-         *			 Generation of K_t
-         * ==========================================
-         */
-        KeyGenerator kg = null;
-		try {
+    	try {
+	        /* 
+	         * ==========================================
+	         *			 Generation of K_t
+	         * ==========================================
+	         */
+	        KeyGenerator kg = null;
 			kg = KeyGenerator.getInstance("HmacSHA256");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
-		}
-        //kg.init(256);
-
-        SecretKey kt = kg.generateKey();
-        if(kt != null)
-        	System.out.println("Key : " + Base64.getEncoder().encodeToString(kt.getEncoded()) + " : (" + kt.getEncoded().length + " Bytes)");
+	        //kg.init(256);
+	
+	        SecretKey kt = kg.generateKey();
+	        byte[] ktBytes = kt.getEncoded(); 
         
-        byte[] ktBytes = kt.getEncoded(); 
-        SecretKeySpec ktSpec = new SecretKeySpec(ktBytes, "HmacSHA1");
         
-        try {
         	/* 
              * ==========================================
              *			 Generation of K_enc
@@ -166,7 +178,6 @@ public class DVDManufacturer{
              */
             
 	        byte[] kMac = deriveKeyMac(ktBytes);
-	        System.out.println("Length of K_mac = " + kMac.length);
 	        
 	        
 	        /* 
@@ -180,12 +191,10 @@ public class DVDManufacturer{
 			cipher.init(Cipher.ENCRYPT_MODE, kEncSpec);
 			
 			byte[] IV = cipher.getIV();
-			System.out.println("IV : " + Base64.getEncoder().encodeToString(IV));
 			
 			byte[] encryptedBytes = cipher.doFinal(content.getBytes());
-			
-			System.out.println("Encrypted content : " + Base64.getEncoder().encodeToString(encryptedBytes));
-			
+			String encryptedContentString = DatatypeConverter.printHexBinary(encryptedBytes);
+
 			
 			/* 
              * ==========================================
@@ -206,6 +215,9 @@ public class DVDManufacturer{
              * ==========================================
              */
 			HashMap<Long, byte[]> encryptionsKt = new HashMap<Long, byte[]>();
+			HashMap<Long, String> encryptionsKt_hex = new HashMap<Long, String>();
+			
+			
 			Iterator it = setKeys.entrySet().iterator();
 			
 			Cipher keyCipher = Cipher.getInstance("AES");
@@ -213,70 +225,37 @@ public class DVDManufacturer{
 				Map.Entry<Long, byte[]> pair = (Map.Entry<Long, byte[]>)it.next();
 				keyCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(pair.getValue(), "AES"));
 				
-				encryptionsKt.put(pair.getKey(), cipher.doFinal());
+				encryptionsKt.put(pair.getKey(), keyCipher.doFinal(kEnc));
+				//encryptionsKt_hex.put(pair.getKey(), bytesToHex(keyCipher.doFinal(kEnc)));
+				encryptionsKt_hex.put(pair.getKey(), DatatypeConverter.printHexBinary(keyCipher.doFinal(kEnc)));
 			}
 			
+			/* 
+             * ==========================================
+             *			   Generate the file 
+             * ==========================================
+             */
+			StringBuilder header = new StringBuilder();
+			header.append(content_title + "\n");
 			
-			
-			
-			/* ================ DEBUG =============== */
-			/*
-			 try{
-		            FileOutputStream fout = new FileOutputStream("encoded.enc");
-		            fout.write(encryptedBytes);
-		            fout.close();
-		          
-		     }catch( Exception e ){
-		    	 e.printStackTrace();
-		     }
-			 
-			 byte[] filecontent = null;
-			 try{
-				 	File file = new File("encoded.enc");
-		            FileInputStream fin = new FileInputStream(file);
-		            
-		            filecontent = new byte[(int)file.length()];
-		            
-		            fin.read(filecontent);
-		            
-		            fin.close();
-		          
-		     }catch( Exception e ){
-		    	 e.printStackTrace();
-		     }
-			
-			 encryptedBytes = filecontent;
-			 
-			
-			*/
-			/* ================ END DEBUG =============== */
-			// DECRYPT
-			cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-			try {
-				cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(IV));
-			} catch (InvalidAlgorithmParameterException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			it = encryptionsKt_hex.entrySet().iterator();
+			while(it.hasNext()){
+				Map.Entry<Long, String> pair = (Map.Entry<Long, String>)it.next();
+				header.append(pair.getKey() + " " + pair.getValue() + "\n");
 			}
 			
-			try {
-				System.out.println("Plain text : " + new String(cipher.doFinal(encryptedBytes), "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			StringBuilder fileString = new StringBuilder();
+			fileString.append(header);
+			fileString.append(encryptedContentString);
 			
+			return fileString.toString();
 			
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
-        
-        
-        
-        
-		return content;
+      
     }
     
     
@@ -311,5 +290,16 @@ public class DVDManufacturer{
 		}   
     }
     
+    /*
+    private static String bytesToHex(byte[] bytes) {
+	    char[] hexChars = new char[bytes.length * 2];
+	    for ( int j = 0; j < bytes.length; j++ ) {
+	        int v = bytes[j] & 0xFF;
+	        hexChars[j * 2] = hexArray[v >>> 4];
+	        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+	    }
+	    return new String(hexChars);
+	}
+	*/
 
 }//end class

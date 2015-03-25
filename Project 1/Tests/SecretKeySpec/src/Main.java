@@ -1,3 +1,4 @@
+import java.io.ByteArrayOutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -16,61 +17,43 @@ import java.util.*;
 
 
 public class Main {
-
-	public static void main(String[] args) {
-		/* 
-         * ==========================================
-         *			 Generation of K_enc
-         * ==========================================
-         */
-		
-		KeyGenerator kg = null;
-		try {
-			kg = KeyGenerator.getInstance("HmacSHA512");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-        kg.init(256);
-
-        SecretKey kt = kg.generateKey();
-        System.out.println("Length of Kt = " + kt.getEncoded().length);
-	        
-        Mac mac;
-		try {
-			mac = Mac.getInstance("HmacSHA512");
-	        mac.init(kt);
 	
-	        byte[] kEnc = mac.doFinal("CONTENT".getBytes()); // K_enc = HMAC(K_t, "enc")
-	        System.out.println("Length of kEnc = " + kEnc.length);
-	        SecretKeySpec kEncSpec = new SecretKeySpec(kEnc, "AES");
+	public static void main(String[] args) {
+		
+		try {
+			String content = "aaaaaasfdg";
+			Cipher cipher = Cipher.getInstance("AES");
+			
+			KeyGenerator kg = null;
+			try {
+				kg = KeyGenerator.getInstance("AES");
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+	        kg.init(128);
+
+	        SecretKey kt = kg.generateKey();
+			
+	        cipher.init(Cipher.ENCRYPT_MODE, kt);
+	        
+	        System.out.println("Content to encrypt : " + Base64.getEncoder().encodeToString(content.getBytes()));
+	        byte[] enc = cipher.doFinal(content.getBytes());
+	        
+	        cipher = Cipher.getInstance("AES");
+	        cipher.init(Cipher.DECRYPT_MODE, kt);
+	        
+	        byte[] plain = cipher.doFinal(enc);
+	        System.out.println("Plain text : " + Base64.getEncoder().encodeToString(plain));
+	        
+	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	        
 	        
-	        /* 
-	         * ==========================================
-	         *			 Encryption of the content
-	         * ==========================================
-	         */
-	        
-	        Cipher cipher = null;
-	    	cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, kEncSpec);
-			
-			byte[] IV = cipher.getIV();
-			System.out.println("IV : " + Base64.getEncoder().encodeToString(IV));
-			
-			byte[] encryptedBytes = cipher.doFinal("CONTENT".getBytes());
-			
-			System.out.println("Encrypted : " + Base64.getEncoder().encodeToString(encryptedBytes));
-			
-			cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-			cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(IV));
-			
-			System.out.println("Decrypted : " + Base64.getEncoder().encodeToString(cipher.doFinal(encryptedBytes)));
-			
-		} catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
 	}
 
 }
