@@ -10,6 +10,7 @@ package info0045;
 
 import java.io.*;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -230,6 +231,7 @@ public class DVDManufacturer{
 				encryptionsKt_hex.put(pair.getKey(), DatatypeConverter.printHexBinary(keyCipher.doFinal(kEnc)));
 			}
 			
+			
 			/* 
              * ==========================================
              *			   Generate the file 
@@ -246,7 +248,15 @@ public class DVDManufacturer{
 			
 			StringBuilder fileString = new StringBuilder();
 			fileString.append(header);
-			fileString.append(encryptedContentString);
+			fileString.append(encryptedContentString + "\n");
+			
+			/* 
+             * ==========================================
+             *				  Generate MAC
+             * ==========================================
+             */
+			String MAC = DatatypeConverter.printHexBinary(generateMAC(fileString.toString()));
+			fileString.append(MAC);
 			
 			return fileString.toString();
 			
@@ -288,6 +298,18 @@ public class DVDManufacturer{
 			e.printStackTrace();
 			return null;
 		}   
+    }
+    
+    
+    private byte[] generateMAC(String content){
+    	MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("SHA-512");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		
+		return md.digest(content.getBytes());
     }
     
     /*
