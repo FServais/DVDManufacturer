@@ -155,10 +155,7 @@ public class DVDManufacturer{
              *			 Generation of K_enc
              * ==========================================
              */
-	        Mac mac = Mac.getInstance("HmacMD5");
-	        mac.init(ktSpec);
-
-	        byte[] kEnc = mac.doFinal("enc".getBytes()); // K_enc = HMAC(K_t, "enc")
+	        byte[] kEnc = deriveKeyEnc(ktBytes);
 	        SecretKey kEncSpec = new SecretKeySpec(kEnc, "AES");
 	        
 	        
@@ -168,10 +165,7 @@ public class DVDManufacturer{
              * ==========================================
              */
             
-	        mac = Mac.getInstance("HmacSHA1");
-	        mac.init(ktSpec);
-
-	        byte[] kMac = mac.doFinal("mac".getBytes()); // K_mac = HMAC(K_t, "mac")
+	        byte[] kMac = deriveKeyMac(ktBytes);
 	        System.out.println("Length of K_mac = " + kMac.length);
 	        
 	        
@@ -199,6 +193,25 @@ public class DVDManufacturer{
              * ==========================================
              */
 			
+			PlayerKeys pk = new PlayerKeys();
+			HashMap<Long, byte[]> setKeys = new HashMap<Long, byte[]>();
+			
+			// TEMP
+			String aacsPasswd = "temp";
+			
+			for(long id : coverIds)
+				setKeys.put(id, pk.generateKey(id, aacsPasswd));
+			
+			
+			/* 
+             * ==========================================
+             *		Encrypt K_enc with set of keys
+             * ==========================================
+             */
+			ArrayList encryptionsKEnc = new ArrayList<byte[]>();
+			for(byte[] key : setKeys){
+				
+			}
 			
 			
 			
@@ -261,5 +274,37 @@ public class DVDManufacturer{
         
 		return content;
     }
+    
+    
+    private byte[] deriveKeyEnc(byte[] kt){
+    	SecretKeySpec ktSpec = new SecretKeySpec(kt, "HmacSHA1");
+        
+        Mac mac;
+		try {
+			mac = Mac.getInstance("HmacMD5");
+			mac.init(ktSpec);
+
+	        return mac.doFinal("enc".getBytes()); // K_enc = HMAC(K_t, "enc")
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
+			e.printStackTrace();
+			return null;
+		}    
+    }
+    
+    private byte[] deriveKeyMac(byte[] kt){
+    	SecretKeySpec ktSpec = new SecretKeySpec(kt, "HmacSHA1");
+        
+        Mac mac;
+		try {
+			mac = Mac.getInstance("HmacSHA1");
+			mac.init(ktSpec);
+
+	        return mac.doFinal("mac".getBytes()); // K_mac = HMAC(K_t, "mac")
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
+			e.printStackTrace();
+			return null;
+		}   
+    }
+    
 
 }//end class
