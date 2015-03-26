@@ -19,6 +19,13 @@ public class MainBytes {
         encryption.add(nodeSize);
         
         System.out.println("List : " + encryption.toString());
+        
+        byte[] test = {(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0xD4};
+        System.out.println("Hex to int : " + bytesToInt(test));
+        
+        long i = 505;
+        byte[] i_bytes = longToBytes(i);
+        System.out.println(String.format("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", i_bytes[0], i_bytes[1], i_bytes[2], i_bytes[3], i_bytes[4], i_bytes[5], i_bytes[6], i_bytes[7]));
 	}
 	
 	private static void addArrayToListByte(ArrayList<Byte> list, byte[] array){
@@ -31,20 +38,18 @@ public class MainBytes {
     }
     
     private static long bytesToLong(byte[] x){
-		long result = 0;
-		for (byte value : x){
-		    result <<= 8;
-		    result += value;
-		}
-		
-		return result;
+    	ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.put(x);
+        buffer.flip();//need flip 
+        return buffer.getLong();
 	}
     
     private static byte[] intToBytes(int x){
     	return ByteBuffer.allocate(4).putInt(x).array();
     }
     
-    private static int bytesToInt(byte[] x){
+    private static int bytesToInt(byte[] b){
+    	/*
 		int result = 0;
 		for (byte value : x){
 		    result <<= 4;
@@ -52,5 +57,10 @@ public class MainBytes {
 		}
 		
 		return result;
+		*/
+    	return   b[3] & 0xFF |
+                (b[2] & 0xFF) << 8 |
+                (b[1] & 0xFF) << 16 |
+                (b[0] & 0xFF) << 24;
 	}
 }

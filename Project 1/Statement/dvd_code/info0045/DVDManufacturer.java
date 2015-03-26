@@ -10,7 +10,6 @@ package info0045;
 
 import java.io.*;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -175,8 +174,6 @@ public class DVDManufacturer{
             byte[] IV = cipher.getIV();
             
             byte[] encryptedBytes = cipher.doFinal(content.getBytes());
-            String encryptedContentString = DatatypeConverter.printHexBinary(encryptedBytes);
-
             
             /* 
              * ==========================================
@@ -207,8 +204,7 @@ public class DVDManufacturer{
                 Map.Entry<Long, byte[]> pair = it.next();
                 keyCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(pair.getValue(), "AES"));
                 
-                encryptionsKt.put(pair.getKey(), keyCipher.doFinal(kEnc));
-                //encryptionsKt_hex.put(pair.getKey(), bytesToHex(keyCipher.doFinal(kEnc)));
+                encryptionsKt.put(pair.getKey(), keyCipher.doFinal(ktBytes));
                 encryptionsKt_hex.put(pair.getKey(), DatatypeConverter.printHexBinary(keyCipher.doFinal(ktBytes)));
             }
             
@@ -222,7 +218,7 @@ public class DVDManufacturer{
             int titleSize = content_title.length();
             int numOfKeys = setKeys.size();
             byte nodeSize = 8; // Node in a long -> 8 bytes
-            byte keySize = 16; // Key on 16 bytes
+            byte keySize = 48; 
             byte ivSize = (byte) IV.length;
             int contentSize = encryptedBytes.length;
             
@@ -235,7 +231,9 @@ public class DVDManufacturer{
             Iterator<Map.Entry<Long, byte[]>> it_bytes = encryptionsKt.entrySet().iterator();
             while(it_bytes.hasNext()){
                 Map.Entry<Long, byte[]> pair = it_bytes.next();
-                addArrayToListByte(encryption, concatenateBytes(longToBytes(pair.getKey()), pair.getValue())); // node||key
+                // node||key
+                addArrayToListByte(encryption, longToBytes(pair.getKey())); 
+                addArrayToListByte(encryption, pair.getValue());
             }
             
             encryption.add(ivSize);
@@ -271,7 +269,7 @@ public class DVDManufacturer{
             
             return fileString.toString();
             */
-            
+
             byte[] macFile = generateMAC(listToArrayBytes(encryption), kMac);
             addArrayToListByte(encryption, macFile);
             
@@ -317,9 +315,6 @@ public class DVDManufacturer{
     }
     
     
-    private byte[] generateMAC(String content, byte[] kMac){
-        return generateMAC(content.getBytes(), kMac);
-    }
     
     private byte[] generateMAC(byte[] content, byte[] kMac){
         SecretKeySpec ktSpec = new SecretKeySpec(kMac, "HmacSHA512");
@@ -346,44 +341,12 @@ public class DVDManufacturer{
     	return ByteBuffer.allocate(8).putLong(x).array();
     }
     
-    private long bytesToLong(byte[] x){
-		long result = 0;
-		for (byte value : x){
-		    result <<= 8;
-		    result += value;
-		}
-		
-		return result;
-	}
+    
     
     private byte[] intToBytes(int x){
     	return ByteBuffer.allocate(4).putInt(x).array();
     }
     
-    private int bytesToInt(byte[] x){
-		int result = 0;
-		for (byte value : x){
-		    result <<= 4;
-		    result += value;
-		}
-		
-		return result;
-	}
-    
-    /**
-     * 
-     * Source: http://stackoverflow.com/a/5513188
-     * @param a
-     * @param b
-     * @return
-     */
-    private byte[] concatenateBytes(byte[] a, byte[] b){
-    	byte[] c = new byte[a.length + b.length];
-    	System.arraycopy(a, 0, c, 0, a.length);
-    	System.arraycopy(b, 0, c, a.length, b.length);
-    	
-    	return c;
-    }
     
     
     private byte[] listToArrayBytes(ArrayList<Byte> list){

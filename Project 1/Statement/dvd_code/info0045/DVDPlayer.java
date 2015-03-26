@@ -13,15 +13,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
 import java.nio.ByteBuffer;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -33,8 +29,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import javax.xml.bind.DatatypeConverter;
 
 
@@ -57,7 +51,7 @@ public class DVDPlayer {
         String decFilename = getOutputFilename(encFilename);
         
         try{
-            //FileInputStream fin = new FileInputStream(encFilename);
+            FileInputStream fin = new FileInputStream(encFilename);
             FileOutputStream fout = new FileOutputStream(decFilename);
             
             /* 
@@ -66,6 +60,76 @@ public class DVDPlayer {
              * ==========================================
              */
             
+            byte[] titleSize_arr = new byte[4];
+            int titleSize;
+
+            byte[] numOfKeys_arr = new byte[4];
+            int numOfKeys;
+
+            byte[] nodeSize_arr = new byte[1];
+            byte nodeSize;
+
+            byte[] keySize_arr = new byte[1];
+            byte keySize;
+
+            byte[] ivSize_arr = new byte[1];
+            byte ivSize;
+
+            byte[] contentSize_arr = new byte[4];
+            int contentSize;
+            
+            
+            fin.read(titleSize_arr);
+            titleSize = bytesToInt(titleSize_arr);
+            
+            byte[] title_arr = new byte[titleSize];
+            fin.read(title_arr);
+            String title = new String(title_arr, "UTF-8");
+            
+            fin.read(numOfKeys_arr);
+            numOfKeys = bytesToInt(numOfKeys_arr);
+            
+            fin.read(nodeSize_arr);
+            nodeSize = nodeSize_arr[0];
+            
+            fin.read(keySize_arr);
+            keySize = keySize_arr[0];
+            
+            HashMap<Long, byte[]> nodesKeys = new HashMap<Long, byte[]>();
+            
+            for(int i = 0 ; i < numOfKeys ; ++i){
+            	byte[] node_arr = new byte[nodeSize];
+            	byte[] key = new byte[keySize];
+            	
+            	fin.read(node_arr);
+            	fin.read(key);
+
+            	nodesKeys.put(bytesToLong(node_arr), key);
+            }
+            
+            fin.read(ivSize_arr);
+            ivSize = ivSize_arr[0];
+            byte[] iv = new byte[ivSize];
+            fin.read(iv);
+            
+            fin.read(contentSize_arr);
+            contentSize = bytesToInt(contentSize_arr);
+            
+            byte[] content = new byte[contentSize];
+            fin.read(content);
+            
+            byte[] mac = new byte[64];
+            fin.read(mac);
+                        
+            fin.close();
+            
+            fin = new FileInputStream(encFilename);
+            byte[] fileWithoutMac = new byte[4 + titleSize + 4 + 1 + 1 + (nodeSize + keySize) * numOfKeys + 1 + ivSize + 4 + contentSize];
+            fin.read(fileWithoutMac);
+            
+            fin.close();
+            
+            /*
             BufferedReader br = new BufferedReader(new FileReader(encFilename));
             StringBuilder file = new StringBuilder(); // header (title, node+key, IV) + content (without mac)
             String title = br.readLine();
@@ -95,7 +159,7 @@ public class DVDPlayer {
             file.append(content + "\n");
             
             System.out.println("Title : " + title);
-            
+            */
             /* 
              * ==========================================
              *       		Reading the DVD
@@ -107,25 +171,26 @@ public class DVDPlayer {
                 Map.Entry<Long, byte[]> pair = (Map.Entry<Long, byte[]>) it_keys_file.next();
                 long nodeID = pair.getKey();
                 byte[] key = pair.getValue();
-                
+                                
                 if(!nodesKeys.containsKey(nodeID))
                     continue;
                 
-                
-                byte[] keyFile = DatatypeConverter.parseHexBinary(nodesKeys.get(nodeID));
+                //byte[] keyFile = DatatypeConverter.parseHexBinary(nodesKeys.get(nodeID));
+                byte[] keyFile = nodesKeys.get(nodeID);
                 
                 Cipher keyCipher = Cipher.getInstance("AES");
                 keyCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
                 byte[] plain_kt = keyCipher.doFinal(keyFile);
-                
+                                
                 byte[] k_mac = deriveKeyMac(plain_kt);
-                
-                byte[] mac_content = generateMAC(file.toString(), k_mac);
+                                
+                //byte[] mac_content = generateMAC(file.toString(), k_mac);
+                byte[] mac_content = generateMAC(fileWithoutMac, k_mac);
                 
                 // Check the MAC
-                if(!mac.equals(DatatypeConverter.printHexBinary(mac_content))){
+                if(!DatatypeConverter.printHexBinary(mac).equals(DatatypeConverter.printHexBinary(mac_content))){
                     System.err.println("MAC not corresponding");
-                    return;
+                    continue;
                 }
                 
                 
@@ -136,13 +201,11 @@ public class DVDPlayer {
                 SecretKey kEncSpec = new SecretKeySpec(k_enc, "AES");
                 Cipher cipher = null;
                 cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-                cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(DatatypeConverter.parseHexBinary(iv)));
+                //cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(DatatypeConverter.parseHexBinary(iv)));
+                cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(iv));
                 
-                byte[] plain_content = cipher.doFinal(DatatypeConverter.parseHexBinary(content));
-                
-                System.out.println("============== Plain text ============== ");
-                System.out.println(new String(plain_content, "UTF-8"));
-                System.out.println("======================================== ");
+                //byte[] plain_content = cipher.doFinal(DatatypeConverter.parseHexBinary(content));
+                byte[] plain_content = cipher.doFinal(content);
                 
                 fout.write(plain_content);
                 
@@ -287,10 +350,28 @@ public class DVDPlayer {
     
     public byte[] longToBytes(long x) {
         
-        ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
-        buffer.putLong(x);
-        return buffer.array();
+    	return ByteBuffer.allocate(8).putLong(x).array();
     }
+    
+    private long bytesToLong(byte[] buf){
+    	long l = ((buf[0] & 0xFFL) << 56) |
+    	         ((buf[1] & 0xFFL) << 48) |
+    	         ((buf[2] & 0xFFL) << 40) |
+    	         ((buf[3] & 0xFFL) << 32) |
+    	         ((buf[4] & 0xFFL) << 24) |
+    	         ((buf[5] & 0xFFL) << 16) |
+    	         ((buf[6] & 0xFFL) <<  8) |
+    	         ((buf[7] & 0xFFL) <<  0) ;
+    	return l;
+	}
+    
+    // http://stackoverflow.com/a/5399829
+    private int bytesToInt(byte[] b){
+    	return   b[3] & 0xFF |
+                (b[2] & 0xFF) << 8 |
+                (b[1] & 0xFF) << 16 |
+                (b[0] & 0xFF) << 24;
+	}
     
     
     protected byte[] generateKey(long nodeId, String aacsPasswd){
@@ -317,7 +398,7 @@ public class DVDPlayer {
         }   
     }
     
-    private static byte[] generateMAC(String content, byte[] kMac){
+    private byte[] generateMAC(byte[] content, byte[] kMac){
         SecretKeySpec ktSpec = new SecretKeySpec(kMac, "HmacSHA512");
         
         Mac mac;
@@ -325,7 +406,7 @@ public class DVDPlayer {
             mac = Mac.getInstance("HmacSHA512");
             mac.init(ktSpec);
 
-            return mac.doFinal(content.getBytes());
+            return mac.doFinal(content);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             e.printStackTrace();
             return null;
@@ -346,4 +427,5 @@ public class DVDPlayer {
             return null;
         }    
     }
+ 
 }//end class
