@@ -247,7 +247,7 @@ public class DVDManufacturer{
             HashMap<Long, byte[]> setKeys = new HashMap<Long, byte[]>();
             
             for(long id : coverIds)
-                setKeys.put(id, pk.generateKey(id, aacsPasswd));
+                setKeys.put(id, pk.generateKey(id, aacsPasswd.getBytes()));
             
             
             /* 
