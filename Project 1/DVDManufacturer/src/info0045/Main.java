@@ -1,3 +1,4 @@
+package info0045;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -23,7 +24,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import java.util.*;
 import java.util.Map.Entry;
-
 
 public class Main {
 	
@@ -116,13 +116,10 @@ public class Main {
 		} catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidAlgorithmParameterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -134,7 +131,6 @@ public class Main {
 		try {
 			md = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		byte[] nodeIdToByte = longToBytes(nodeId);

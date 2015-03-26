@@ -5,8 +5,6 @@
  * to a file
  */
 
-package info0045;
-
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.security.Key;
@@ -18,19 +16,18 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 
 public class PlayerKeys{
-
+	
 	protected byte[] generateKey(long nodeId, String aacsPasswd){
-        try {
-            return this.generateKey(nodeId, KeyTree.createAESKeyMaterial(aacsPasswd));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
+		try {
+			return this.generateKey(nodeId, KeyTree.createAESKeyMaterial(aacsPasswd));
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	protected byte[] generateKey(long nodeId, byte[] aacsKey){
 		
 		MessageDigest md = null;
@@ -45,26 +42,14 @@ public class PlayerKeys{
 		byte[] toReturn = new byte[nodeIdToByte.length];
 		for(int i = 0; i < nodeIdToByte.length && i < aacsKey.length; ++i)			
 			toReturn[i] = (byte) (nodeIdToByte[i] ^ aacsKey[i]); 
-		byte[] key = md.digest(toReturn);
-		return key;
+		
+		return md.digest(toReturn);
 		
 	}
-	
-	public byte[] concat(byte[] a, byte[] b) {
-		
-		   int aLen = a.length;
-		   int bLen = b.length;
-		   byte[] c= new byte[aLen+bLen];
-
-		   System.arraycopy(a, 0, c, 0, aLen);
-		   System.arraycopy(b, 0, c, aLen, bLen);
-		   
-		   return c;
-		}
     
 	public byte[] longToBytes(long x) {
 		
-	    ByteBuffer buffer = ByteBuffer.allocate(8);
+	    ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
 	    buffer.putLong(x);
 	    return buffer.array();
 	}
@@ -87,30 +72,28 @@ public class PlayerKeys{
             FileOutputStream fout = new FileOutputStream(keyFilename);
             byte[] aacsKey = KeyTree.createAESKeyMaterial(aacsPasswd);
             
-            byte[] result = new byte[0];
+            String keys = "";
             for(int i = 0; i < nodeIds.length; ++i){
-            	
-            	byte[] temp = concat(longToBytes(nodeIds[i]), generateKey(nodeIds[i], aacsKey));
-            	result = concat(result, temp );
+            	keys += generateKey(nodeIds[i], aacsKey);
                
             }//end for - i
+            
             byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
             Key sec = new SecretKeySpec(pass, "AES");
+
 			
-			Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+			Cipher AesCipher = Cipher.getInstance("AES");
             AesCipher.init(Cipher.ENCRYPT_MODE, sec);
-            byte[] byteCipherText = AesCipher.doFinal(result);
+            byte[] byteCipherText = AesCipher.doFinal(keys.getBytes());
 
             
             Mac mac = Mac.getInstance("HmacSHA1");
 			SecretKeySpec secret = new SecretKeySpec(passwd.getBytes(), mac.getAlgorithm());
 			mac.init(secret);
 			byte[] auth = mac.doFinal(byteCipherText);
-
+			
 			fout.write(byteCipherText);
 			fout.write(auth);
-			
-			fout.flush();
             fout.close();
         }catch(Exception e){
             e.printStackTrace();
