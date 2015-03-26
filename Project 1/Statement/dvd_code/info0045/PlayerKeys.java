@@ -21,7 +21,16 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
 public class PlayerKeys{
-	
+
+	protected byte[] generateKey(long nodeId, String aacsPasswd){
+        try {
+            return this.generateKey(nodeId, KeyTree.createAESKeyMaterial(aacsPasswd));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 	protected byte[] generateKey(long nodeId, byte[] aacsKey){
 		
 		MessageDigest md = null;
@@ -37,7 +46,6 @@ public class PlayerKeys{
 		for(int i = 0; i < nodeIdToByte.length && i < aacsKey.length; ++i)			
 			toReturn[i] = (byte) (nodeIdToByte[i] ^ aacsKey[i]); 
 		byte[] key = md.digest(toReturn);
-		System.out.println(key.length);
 		return key;
 		
 	}
@@ -88,8 +96,6 @@ public class PlayerKeys{
             }//end for - i
             byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
             Key sec = new SecretKeySpec(pass, "AES");
-            System.out.println(result.length);
-            
 			
 			Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             AesCipher.init(Cipher.ENCRYPT_MODE, sec);
@@ -101,9 +107,8 @@ public class PlayerKeys{
 			mac.init(secret);
 			byte[] auth = mac.doFinal(byteCipherText);
 
-			
-			fout.write(auth);
 			fout.write(byteCipherText);
+			fout.write(auth);
 			
 			fout.flush();
             fout.close();
