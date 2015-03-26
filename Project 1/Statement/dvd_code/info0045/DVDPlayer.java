@@ -49,6 +49,8 @@ public class DVDPlayer {
     public void decryptContent( String encFilename, HashMap<Long, byte[]> keys )
     throws PlayerRevokedException, ContentMACException{
         String decFilename = getOutputFilename(encFilename);
+        boolean nodeFound = false;
+        
         
         try{
             FileInputStream fin = new FileInputStream(encFilename);
@@ -128,38 +130,7 @@ public class DVDPlayer {
             fin.read(fileWithoutMac);
             
             fin.close();
-            
-            /*
-            BufferedReader br = new BufferedReader(new FileReader(encFilename));
-            StringBuilder file = new StringBuilder(); // header (title, node+key, IV) + content (without mac)
-            String title = br.readLine();
-            file.append(title + "\n");
-            
-            String line;
-            HashMap<Long, String> nodesKeys = new HashMap<Long, String>();
-            
-            String[] id_key;
-            while((line = br.readLine()) != null && (id_key = line.split(" ")).length > 1){
-                nodesKeys.put(Long.parseLong(id_key[0]), id_key[1]);
-                file.append(line + "\n");
-            }
-            
-            String iv = line;
-            String content = br.readLine();
-            String mac = br.readLine();
-            
-            br.close();
-            
-            if(iv == null || content == null || mac == null){
-                System.err.println("Malformed file.");
-                return;
-            }
-            
-            file.append(iv + "\n");
-            file.append(content + "\n");
-            
-            System.out.println("Title : " + title);
-            */
+        
             /* 
              * ==========================================
              *       		Reading the DVD
@@ -175,7 +146,8 @@ public class DVDPlayer {
                 if(!nodesKeys.containsKey(nodeID))
                     continue;
                 
-                //byte[] keyFile = DatatypeConverter.parseHexBinary(nodesKeys.get(nodeID));
+                nodeFound = true;
+                
                 byte[] keyFile = nodesKeys.get(nodeID);
                 
                 Cipher keyCipher = Cipher.getInstance("AES");
@@ -184,14 +156,11 @@ public class DVDPlayer {
                                 
                 byte[] k_mac = deriveKeyMac(plain_kt);
                                 
-                //byte[] mac_content = generateMAC(file.toString(), k_mac);
                 byte[] mac_content = generateMAC(fileWithoutMac, k_mac);
                 
                 // Check the MAC
-                if(!DatatypeConverter.printHexBinary(mac).equals(DatatypeConverter.printHexBinary(mac_content))){
-                    System.err.println("MAC not corresponding");
-                    continue;
-                }
+                if(!DatatypeConverter.printHexBinary(mac).equals(DatatypeConverter.printHexBinary(mac_content)))
+                    throw new ContentMACException();
                 
                 
                 // Derive k_enc
@@ -201,18 +170,21 @@ public class DVDPlayer {
                 SecretKey kEncSpec = new SecretKeySpec(k_enc, "AES");
                 Cipher cipher = null;
                 cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-                //cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(DatatypeConverter.parseHexBinary(iv)));
                 cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(iv));
                 
-                //byte[] plain_content = cipher.doFinal(DatatypeConverter.parseHexBinary(content));
                 byte[] plain_content = cipher.doFinal(content);
                 
+                fout.write(title.getBytes());
+                fout.write("\n".getBytes());
                 fout.write(plain_content);
                 
                 break;
             }
 
             fout.close();
+            
+            if(!nodeFound)
+            	throw new PlayerRevokedException();
             
             new File(encFilename).delete();
             
