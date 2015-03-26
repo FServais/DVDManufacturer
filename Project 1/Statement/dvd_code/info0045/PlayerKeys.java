@@ -37,7 +37,6 @@ public class PlayerKeys{
 		try {
 			md = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		byte[] nodeIdToByte = longToBytes(nodeId);

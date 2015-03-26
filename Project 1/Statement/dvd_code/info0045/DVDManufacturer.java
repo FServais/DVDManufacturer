@@ -19,10 +19,9 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
 import java.lang.StringBuilder;
+import java.nio.ByteBuffer;
 
 public class DVDManufacturer{
-    
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
     
     private final static String revocationFilename = "revoke.lst";
     
@@ -50,12 +49,13 @@ public class DVDManufacturer{
             }
 
             String content = sb.toString();
-
+            
+            // Cover set
             long[] idsCover = new KeyTree().getCoverSet(revocationList);
             
-            String encryptedContent = encrypt(title, content, idsCover, aacsPasswd);            
+            byte[] encryptedContent = encrypt(title, content, idsCover, aacsPasswd);            
             
-            fout.write(encryptedContent.getBytes());
+            fout.write(encryptedContent);
             
             fin.close();
             fout.close();
@@ -86,24 +86,6 @@ public class DVDManufacturer{
             DVDManufacturer manu = new DVDManufacturer();
             
             manu.encryptContent(title, contentFile, revList, aacsPwd);
-            
-            /* ======== DEBUG ======== */
-            
-            File file = new File("content.txt.enc");
-            FileInputStream fis = new FileInputStream(file);
-            
-            
-            StringBuilder sb = new StringBuilder();
-            int inchar;
-            while((inchar = fis.read()) != -1){
-                sb.append((char)inchar);
-            }
-            
-            fis.close();
-            
-            
-            
-            /* ======== DEBUG ======== */
             
         }catch(Exception e){
             e.printStackTrace();
@@ -146,7 +128,9 @@ public class DVDManufacturer{
      * @param  coverKeys Set of keys that will encrypt the content.
      * @return           Encrypted content, in the form header||encrypted content.
      */
-    private String encrypt(String content_title, String content, long[] coverIds, String aacsPasswd){
+    private byte[] encrypt(String content_title, String content, long[] coverIds, String aacsPasswd){
+    	ArrayList<Byte> encryption = new ArrayList<Byte>();
+    	
         try {
             /* 
              * ==========================================
@@ -175,7 +159,6 @@ public class DVDManufacturer{
              *           Generation of K_mac
              * ==========================================
              */
-            
             byte[] kMac = deriveKeyMac(ktBytes);
             
             
@@ -235,6 +218,33 @@ public class DVDManufacturer{
              *             Generate the file 
              * ==========================================
              */
+            
+            int titleSize = content_title.length();
+            int numOfKeys = setKeys.size();
+            byte nodeSize = 8; // Node in a long -> 8 bytes
+            byte keySize = 16; // Key on 16 bytes
+            byte ivSize = (byte) IV.length;
+            int contentSize = encryptedBytes.length;
+            
+            addArrayToListByte(encryption, intToBytes(titleSize));
+            addArrayToListByte(encryption, content_title.getBytes());
+            addArrayToListByte(encryption, intToBytes(numOfKeys));
+            encryption.add(nodeSize);
+            encryption.add(keySize);
+            
+            Iterator<Map.Entry<Long, byte[]>> it_bytes = encryptionsKt.entrySet().iterator();
+            while(it_bytes.hasNext()){
+                Map.Entry<Long, byte[]> pair = it_bytes.next();
+                addArrayToListByte(encryption, concatenateBytes(longToBytes(pair.getKey()), pair.getValue())); // node||key
+            }
+            
+            encryption.add(ivSize);
+            addArrayToListByte(encryption, IV); // Initialization vector
+            
+            addArrayToListByte(encryption, intToBytes(contentSize));
+            addArrayToListByte(encryption, encryptedBytes); //Content
+            
+            /*
             StringBuilder header = new StringBuilder();
             header.append(content_title + "\n");
 
@@ -248,19 +258,26 @@ public class DVDManufacturer{
             fileString.append(header);
             fileString.append(DatatypeConverter.printHexBinary(IV) + "\n");
             fileString.append(encryptedContentString + "\n");
+            */
             
             /* 
              * ==========================================
              *                Generate MAC
              * ==========================================
              */
+            /*
             String MAC = DatatypeConverter.printHexBinary(generateMAC(fileString.toString(), kMac));
             fileString.append(MAC);
             
             return fileString.toString();
+            */
+            
+            byte[] macFile = generateMAC(listToArrayBytes(encryption), kMac);
+            addArrayToListByte(encryption, macFile);
+            
+            return listToArrayBytes(encryption);
             
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
         }
@@ -301,6 +318,10 @@ public class DVDManufacturer{
     
     
     private byte[] generateMAC(String content, byte[] kMac){
+        return generateMAC(content.getBytes(), kMac);
+    }
+    
+    private byte[] generateMAC(byte[] content, byte[] kMac){
         SecretKeySpec ktSpec = new SecretKeySpec(kMac, "HmacSHA512");
         
         Mac mac;
@@ -308,12 +329,72 @@ public class DVDManufacturer{
             mac = Mac.getInstance("HmacSHA512");
             mac.init(ktSpec);
 
-            return mac.doFinal(content.getBytes());
+            return mac.doFinal(content);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             e.printStackTrace();
             return null;
         }
     }
     
-
+    
+    private void addArrayToListByte(ArrayList<Byte> list, byte[] array){
+    	for(byte item : array)
+    		list.add(item);
+    }
+    
+    private byte[] longToBytes(long x){
+    	return ByteBuffer.allocate(8).putLong(x).array();
+    }
+    
+    private long bytesToLong(byte[] x){
+		long result = 0;
+		for (byte value : x){
+		    result <<= 8;
+		    result += value;
+		}
+		
+		return result;
+	}
+    
+    private byte[] intToBytes(int x){
+    	return ByteBuffer.allocate(4).putInt(x).array();
+    }
+    
+    private int bytesToInt(byte[] x){
+		int result = 0;
+		for (byte value : x){
+		    result <<= 4;
+		    result += value;
+		}
+		
+		return result;
+	}
+    
+    /**
+     * 
+     * Source: http://stackoverflow.com/a/5513188
+     * @param a
+     * @param b
+     * @return
+     */
+    private byte[] concatenateBytes(byte[] a, byte[] b){
+    	byte[] c = new byte[a.length + b.length];
+    	System.arraycopy(a, 0, c, 0, a.length);
+    	System.arraycopy(b, 0, c, a.length, b.length);
+    	
+    	return c;
+    }
+    
+    
+    private byte[] listToArrayBytes(ArrayList<Byte> list){
+    	byte[] bytes = new byte[list.size()];
+    	int i = 0;
+    	for(Byte b : list){
+    		bytes[i] = (byte)b;
+    		++i;
+    	}
+    	
+    	return bytes;
+    }
+    
 }//end class

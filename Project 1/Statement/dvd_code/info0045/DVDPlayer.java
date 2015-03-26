@@ -52,118 +52,28 @@ public class DVDPlayer {
     // getOutputFilename(encFilename). If there is a failure
     // e.g. the player is revoked, you should throw PlayerRevokedException
     // or ContentMACException, as appropriate.
-    public void decryptContent( String encFilename)
+    public void decryptContent( String encFilename, HashMap<Long, byte[]> keys )
     throws PlayerRevokedException, ContentMACException{
         String decFilename = getOutputFilename(encFilename);
         
         try{
-            FileInputStream fin = new FileInputStream(encFilename);
+            //FileInputStream fin = new FileInputStream(encFilename);
             FileOutputStream fout = new FileOutputStream(decFilename);
-
             
-            int inchar;
-            while((inchar = fin.read()) != -1)
-                fout.write(inchar);
-            
-            fin.close();
-            fout.close();
-            
-            new File(encFilename).delete();
-            
-        }catch( Exception e){
-            e.printStackTrace();
-        }
-    }//end decryptContent()
-    
-    public HashMap<Long, byte[]> generateKeys( byte[] rawKeys) {
-    	
-    	HashMap<Long, byte[]> keys = new HashMap<>();
-    	
-    	for(int i = 0; i+24 < rawKeys.length ; i+=24){
-    		Long nodeId = (new BigInteger(Arrays.copyOfRange(rawKeys, i, i+8))).longValue();
-    		byte[] key = Arrays.copyOfRange(rawKeys, i+8, i+24);
-    		keys.put(nodeId, key);
-    	}
-    	return keys;
-    }
-    
-
-    public byte[] decryptKeys( long playerId, String passwd) throws FileNotFoundException, ContentMACException{
-		
-    	File file = new File(DVDPlayer.getKeyFilename(playerId));
-        FileInputStream fileRead = new FileInputStream(file);
-        byte[] fileContent = new byte[((int)file.length()) - 20];
-        byte[] mac = new byte[20];
-       
-        try {
-        
-        fileRead.read(fileContent);	
-        fileRead.read(mac);	
-        
-        byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
-        Key sec = new SecretKeySpec(pass, "AES");
-
-        
-		Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        AesCipher.init(Cipher.DECRYPT_MODE, sec);
-        byte[] bytePlainText = AesCipher.doFinal(fileContent);
-    	
-        Mac macCheck = Mac.getInstance("HmacSHA1");
-		SecretKeySpec secret = new SecretKeySpec(passwd.getBytes(), macCheck.getAlgorithm());
-		macCheck.init(secret);
-		byte[] auth = macCheck.doFinal(fileContent);
-		
-		if(!Arrays.equals(mac, auth)) 
-			throw new ContentMACException();
-    	
-		return bytePlainText;
-    	
-        } catch (IOException | NoSuchAlgorithmException| IllegalBlockSizeException | NoSuchPaddingException 
-        		| BadPaddingException | InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-    	return null;
-
-    }
-    // Parse the command line and decrypt the data.
-    // Usage: DVDPlayer <player id> <player keyfile passwd> <encrypted file>
-    public static void main(String[] args){
-        try{
-            if(args.length != 3){
-                System.out.println("Usage: DVDPlayer <playerID> <player keyfile passwd> <encrypted file>");
-                return;
-            }
-            
-            long playerId = Integer.parseInt(args[0]);
-            String passwd = args[1];
-            String encFilename = args[2];
-            
-            DVDPlayer player = new DVDPlayer(playerId, passwd);
-            
-            /*
-                Reading the file with the keys
-             */
-
-            byte[] rawKeys = player.decryptKeys( playerId, passwd);
-
-            HashMap<Long, byte[]> keys = player.generateKeys(rawKeys);
-            //player.decryptContent(encFilename);
-
-
-            /*
-                Reading the DVD
+            /* 
+             * ==========================================
+             *       		Reading the DVD
+             * ==========================================
              */
             
             BufferedReader br = new BufferedReader(new FileReader(encFilename));
-            StringBuilder file = new StringBuilder();
+            StringBuilder file = new StringBuilder(); // header (title, node+key, IV) + content (without mac)
             String title = br.readLine();
             file.append(title + "\n");
             
             String line;
             HashMap<Long, String> nodesKeys = new HashMap<Long, String>();
             
-            int end_line = 0;
             String[] id_key;
             while((line = br.readLine()) != null && (id_key = line.split(" ")).length > 1){
                 nodesKeys.put(Long.parseLong(id_key[0]), id_key[1]);
@@ -174,6 +84,8 @@ public class DVDPlayer {
             String content = br.readLine();
             String mac = br.readLine();
             
+            br.close();
+            
             if(iv == null || content == null || mac == null){
                 System.err.println("Malformed file.");
                 return;
@@ -183,12 +95,13 @@ public class DVDPlayer {
             file.append(content + "\n");
             
             System.out.println("Title : " + title);
-            Iterator<Map.Entry<Long, String>> it = nodesKeys.entrySet().iterator();
-            while(it.hasNext()){
-                Map.Entry<Long, String> pair = (Map.Entry<Long, String>) it.next();
-            }
-
-
+            
+            /* 
+             * ==========================================
+             *       		Reading the DVD
+             * ==========================================
+             */
+            
             Iterator<Map.Entry<Long, byte[]>> it_keys_file = keys.entrySet().iterator();
             while(it_keys_file.hasNext()){
                 Map.Entry<Long, byte[]> pair = (Map.Entry<Long, byte[]>) it_keys_file.next();
@@ -230,14 +143,101 @@ public class DVDPlayer {
                 System.out.println("============== Plain text ============== ");
                 System.out.println(new String(plain_content, "UTF-8"));
                 System.out.println("======================================== ");
-
+                
+                fout.write(plain_content);
+                
                 break;
             }
 
-        /*
+            fout.close();
+            
+            new File(encFilename).delete();
+            
+        }catch( Exception e){
+            e.printStackTrace();
+        }
+    }//end decryptContent()
+    
+    public HashMap<Long, byte[]> generateKeys( byte[] rawKeys) {
+    	
+    	HashMap<Long, byte[]> keys = new HashMap<>();
+    	
+    	for(int i = 0; i+24 < rawKeys.length ; i+=24){
+    		Long nodeId = (new BigInteger(Arrays.copyOfRange(rawKeys, i, i+8))).longValue();
+    		byte[] key = Arrays.copyOfRange(rawKeys, i+8, i+24);
+    		keys.put(nodeId, key);
+    	}
+    	return keys;
+    }
+    
+
+    public byte[] decryptKeys( long playerId, String passwd) throws FileNotFoundException, ContentMACException{
+		
+    	File file = new File(DVDPlayer.getKeyFilename(playerId));
+        FileInputStream fileRead = new FileInputStream(file);
+        byte[] fileContent = new byte[((int)file.length()) - 20];
+        byte[] mac = new byte[20];
+       
+        try {
+        
+        fileRead.read(fileContent);	
+        fileRead.read(mac);	
+        
+        byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
+        Key sec = new SecretKeySpec(pass, "AES");
+
+        fileRead.close();
+        
+		Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        AesCipher.init(Cipher.DECRYPT_MODE, sec);
+        byte[] bytePlainText = AesCipher.doFinal(fileContent);
+    	
+        Mac macCheck = Mac.getInstance("HmacSHA1");
+		SecretKeySpec secret = new SecretKeySpec(passwd.getBytes(), macCheck.getAlgorithm());
+		macCheck.init(secret);
+		byte[] auth = macCheck.doFinal(fileContent);
+		
+		if(!Arrays.equals(mac, auth)) 
+			throw new ContentMACException();
+    	
+		return bytePlainText;
+    	
+        } catch (IOException | NoSuchAlgorithmException| IllegalBlockSizeException | NoSuchPaddingException 
+        		| BadPaddingException | InvalidKeyException e) {
+			e.printStackTrace();
+		} 
+    	return null;
+
+    }
+    // Parse the command line and decrypt the data.
+    // Usage: DVDPlayer <player id> <player keyfile passwd> <encrypted file>
+    public static void main(String[] args){
+        try{
+            if(args.length != 3){
+                System.out.println("Usage: DVDPlayer <playerID> <player keyfile passwd> <encrypted file>");
+                return;
+            }
+            
+            long playerId = Integer.parseInt(args[0]);
+            String passwd = args[1];
+            String encFilename = args[2];
+            
+            DVDPlayer player = new DVDPlayer(playerId, passwd);
+            
+            /* 
+             * ==========================================
+             *       Reading the file with the keys
+             * ==========================================
+             */
+
+            byte[] rawKeys = player.decryptKeys( playerId, passwd);
+
+            HashMap<Long, byte[]> keys = player.generateKeys(rawKeys);
+            player.decryptContent(encFilename, keys);
+
+        
         }catch(PlayerRevokedException e){
             System.err.println("Unable to decrypt content: Player revoked");
-        */
         }catch( ContentMACException e){
             System.err.println("Unable to decrypt content: MAC Failure");
         }catch( Exception e){
