@@ -161,6 +161,7 @@ public class DVDManufacturer{
 	
 	        SecretKey kt = kg.generateKey();
 	        byte[] ktBytes = kt.getEncoded(); 
+	        System.out.println("K_t : " + DatatypeConverter.printHexBinary(ktBytes));
         
         
         	/* 
@@ -179,6 +180,7 @@ public class DVDManufacturer{
              */
             
 	        byte[] kMac = deriveKeyMac(ktBytes);
+	        System.out.println("k_mac : " + DatatypeConverter.printHexBinary(kMac));
 	        
 	        
 	        /* 
@@ -212,7 +214,7 @@ public class DVDManufacturer{
 			
 			/* 
              * ==========================================
-             *		Encrypt K_enc with set of keys
+             *		Encrypt K_t with set of keys
              * ==========================================
              */
 			HashMap<Long, byte[]> encryptionsKt = new HashMap<Long, byte[]>();
@@ -228,7 +230,7 @@ public class DVDManufacturer{
 				
 				encryptionsKt.put(pair.getKey(), keyCipher.doFinal(kEnc));
 				//encryptionsKt_hex.put(pair.getKey(), bytesToHex(keyCipher.doFinal(kEnc)));
-				encryptionsKt_hex.put(pair.getKey(), DatatypeConverter.printHexBinary(keyCipher.doFinal(kEnc)));
+				encryptionsKt_hex.put(pair.getKey(), DatatypeConverter.printHexBinary(keyCipher.doFinal(ktBytes)));
 			}
 			
 			
@@ -239,7 +241,7 @@ public class DVDManufacturer{
              */
 			StringBuilder header = new StringBuilder();
 			header.append(content_title + "\n");
-			
+
 			it = encryptionsKt_hex.entrySet().iterator();
 			while(it.hasNext()){
 				Map.Entry<Long, String> pair = (Map.Entry<Long, String>)it.next();
@@ -248,6 +250,7 @@ public class DVDManufacturer{
 			
 			StringBuilder fileString = new StringBuilder();
 			fileString.append(header);
+			fileString.append(DatatypeConverter.printHexBinary(IV) + "\n");
 			fileString.append(encryptedContentString + "\n");
 			
 			/* 
@@ -255,7 +258,7 @@ public class DVDManufacturer{
              *				  Generate MAC
              * ==========================================
              */
-			String MAC = DatatypeConverter.printHexBinary(generateMAC(fileString.toString()));
+			String MAC = DatatypeConverter.printHexBinary(generateMAC(fileString.toString(), kMac));
 			fileString.append(MAC);
 			
 			return fileString.toString();
@@ -301,27 +304,20 @@ public class DVDManufacturer{
     }
     
     
-    private byte[] generateMAC(String content){
-    	MessageDigest md = null;
+    private byte[] generateMAC(String content, byte[] kMac){
+    	SecretKeySpec ktSpec = new SecretKeySpec(kMac, "HmacSHA512");
+        
+        Mac mac;
 		try {
-			md = MessageDigest.getInstance("SHA-512");
-		} catch (NoSuchAlgorithmException e) {
+			mac = Mac.getInstance("HmacSHA512");
+			mac.init(ktSpec);
+
+	        return mac.doFinal(content.getBytes());
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
 			e.printStackTrace();
+			return null;
 		}
-		
-		return md.digest(content.getBytes());
     }
     
-    /*
-    private static String bytesToHex(byte[] bytes) {
-	    char[] hexChars = new char[bytes.length * 2];
-	    for ( int j = 0; j < bytes.length; j++ ) {
-	        int v = bytes[j] & 0xFF;
-	        hexChars[j * 2] = hexArray[v >>> 4];
-	        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-	    }
-	    return new String(hexChars);
-	}
-	*/
 
 }//end class
