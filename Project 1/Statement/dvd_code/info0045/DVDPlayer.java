@@ -187,14 +187,15 @@ public class DVDPlayer {
 
             fout.close();
             
-            if(!nodeFound)
-            	throw new PlayerRevokedException();
-            
-            new File(encFilename).delete();
-            
         }catch( Exception e){
             e.printStackTrace();
         }
+        
+        if(!nodeFound)
+        	throw new PlayerRevokedException();
+        
+        new File(encFilename).delete();
+        
     }//end decryptContent()
     
     /**
