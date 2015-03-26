@@ -74,7 +74,6 @@ public class DVDManufacturer{
         try{
             if(args.length != 3){
                 System.out.println("Usage: DVDManufacturer <AACS Pwd> <content title> <content filename>");
-                
                 return;
             }
             
@@ -102,7 +101,6 @@ public class DVDManufacturer{
             
             fis.close();
             
-            System.out.println(sb);
             
             
             /* ======== DEBUG ======== */
@@ -161,9 +159,8 @@ public class DVDManufacturer{
 	
 	        SecretKey kt = kg.generateKey();
 	        byte[] ktBytes = kt.getEncoded(); 
-	        System.out.println("K_t : " + DatatypeConverter.printHexBinary(ktBytes));
-        
-        
+
+	        
         	/* 
              * ==========================================
              *			 Generation of K_enc
@@ -180,7 +177,6 @@ public class DVDManufacturer{
              */
             
 	        byte[] kMac = deriveKeyMac(ktBytes);
-	        System.out.println("k_mac : " + DatatypeConverter.printHexBinary(kMac));
 	        
 	        
 	        /* 
