@@ -14,13 +14,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.security.MessageDigest;
@@ -125,6 +123,7 @@ public class DVDPlayer {
             ivSize = ivSize_arr[0];
             byte[] iv = new byte[ivSize];
             fin.read(iv);
+           
             
             fin.read(contentSize_arr);
             contentSize = bytesToInt(contentSize_arr);
@@ -149,6 +148,15 @@ public class DVDPlayer {
              * ==========================================
              */
             
+            // decrypt IV
+            
+            byte[] pass = KeyTree.createAESKeyMaterial(title); 
+            Key sec = new SecretKeySpec(pass, "AES");
+            Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+	        AesCipher.init(Cipher.DECRYPT_MODE, sec);
+	        byte[] decIV = AesCipher.doFinal(iv);
+	       
+	        
             // Iterate though keys of the player (33 keys)
             Iterator<Map.Entry<Long, byte[]>> it_keys_file = keys.entrySet().iterator();
             while(it_keys_file.hasNext()){
@@ -167,6 +175,7 @@ public class DVDPlayer {
                 
                 keyCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
                 byte[] plain_kt = keyCipher.doFinal(keyFile);
+                
                                 
                 byte[] k_mac = deriveKeyMac(plain_kt);
                                 
@@ -184,7 +193,7 @@ public class DVDPlayer {
                 SecretKeySpec kEncSpec = new SecretKeySpec(k_enc, "AES");
                 Cipher cipher = null;
                 cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-                cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(iv));
+                cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(decIV));
                 
                 byte[] plain_content = cipher.doFinal(content);
                 
