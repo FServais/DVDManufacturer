@@ -10,6 +10,7 @@ package info0045;
 
 import java.io.*;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -231,11 +232,24 @@ public class DVDManufacturer{
             Cipher cipher = null;
             cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, kEncSpec);
+           
+            byte[] encryptedBytes = cipher.doFinal(content.getBytes());
             
             byte[] IV = cipher.getIV();
             
-            byte[] encryptedBytes = cipher.doFinal(content.getBytes());
-            
+            /* 
+             * ==========================================
+             *          Encryption of the IV
+             * ==========================================
+             */
+            Cipher cipherIV = null;
+            byte[] pass = KeyTree.createAESKeyMaterial(content_title); 
+            Key sec = new SecretKeySpec(pass, "AES");
+            cipherIV = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipherIV.init(Cipher.ENCRYPT_MODE, sec);
+            byte[] encIV = cipherIV.doFinal(IV);
+            System.out.println("iv dec "+ DatatypeConverter.printHexBinary(IV));
+           
             
             /* 
              * ==========================================
@@ -268,6 +282,7 @@ public class DVDManufacturer{
                }
             
             
+            
             /* 
              * ==========================================
              *             Generate the file 
@@ -278,7 +293,7 @@ public class DVDManufacturer{
             int numOfKeys = setKeys.size();
             byte nodeSize = 8; // Node in a long -> 8 bytes
             byte keySize = (byte) encryptionsKt.entrySet().iterator().next().getValue().length;
-            byte ivSize = (byte) IV.length;
+            byte ivSize = (byte) encIV.length;
             int contentSize = encryptedBytes.length;
             
             addArrayToListByte(encryption, intToBytes(titleSize));
@@ -298,7 +313,7 @@ public class DVDManufacturer{
             }
             
             encryption.add(ivSize);
-            addArrayToListByte(encryption, IV); // Initialization vector
+            addArrayToListByte(encryption, encIV); // Initialization vector
             
             addArrayToListByte(encryption, intToBytes(contentSize));
             addArrayToListByte(encryption, encryptedBytes); //Content
