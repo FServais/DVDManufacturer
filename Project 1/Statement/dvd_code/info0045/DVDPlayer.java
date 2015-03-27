@@ -42,18 +42,26 @@ public class DVDPlayer {
         
     }//end constructor
     
-    // Verifys and attempts to decrypt the content in encFilename.
+    // Verifies and attempts to decrypt the content in encFilename.
     // You need to implement this function: right now it just copies
     // to "encrypted" file to the output file and deletes the "encrypted"
     // file. You should name the output file by calling
     // getOutputFilename(encFilename). If there is a failure
     // e.g. the player is revoked, you should throw PlayerRevokedException
     // or ContentMACException, as appropriate.
+    /**
+     * Verifies and attempts to decrypt the content in encFilename using the set of node and key,
+     * provided by PlayerKeys, unique for a player.
+     * 
+     * @param encFilename              Encrypted file.
+     * @param keys					   Map containing the set of nodes identifying the player, with the keys associated.
+     * @throws PlayerRevokedException  
+     * @throws ContentMACException
+     */
     public void decryptContent( String encFilename, HashMap<Long, byte[]> keys )
     throws PlayerRevokedException, ContentMACException{
         String decFilename = getOutputFilename(encFilename);
         boolean nodeFound = false;
-        
         
         try{
             FileInputStream fin = new FileInputStream(encFilename);
@@ -303,11 +311,11 @@ public class DVDPlayer {
              * ==========================================
              */
 
-            byte[] rawKeys = player.decryptKeys( playerId, passwd);
+            byte[] rawKeys = player.decryptKeys( playerId, passwd );
             HashMap<Long, byte[]> keys = player.generateKeys(rawKeys);
 
-
             player.decryptContent(encFilename, keys);
+            
         }catch(PlayerRevokedException e){
             System.err.println("Unable to decrypt content: Player revoked");
         }catch( ContentMACException e){
