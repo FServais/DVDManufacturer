@@ -14,11 +14,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+
+import java.util.Arrays;
+import java.util.HashMap;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -234,41 +238,43 @@ public class DVDPlayer {
        
         try {
         	
-        // retrieve info
-        fileRead.read(cipherIV);	
-        fileRead.read(fileContent);	
-        fileRead.read(mac);	
-
-        // Check mac value
-        Mac macCheck = Mac.getInstance("HmacSHA256");
-
-		SecretKeySpec secret = new SecretKeySpec(passwd.getBytes(), macCheck.getAlgorithm());
-		macCheck.init(secret);
-		byte[] auth = macCheck.doFinal(fileContent);
-		
-		// if the mac don't match, the file has been modified
-		if(!Arrays.equals(mac, auth)) 
-			throw new ContentMACException();
-		
-        // generate the key for decryption
-        byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
-        Key sec = new SecretKeySpec(pass, "AES");
-        
-        // decrypt IV
-        Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        AesCipher.init(Cipher.DECRYPT_MODE, sec);
-        byte[] iv =  AesCipher.doFinal(cipherIV);
-       
-        // With IV, decrypt keys
-        IvParameterSpec ivSpec = new IvParameterSpec(iv); 
-		AesCipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
-        AesCipher.init(Cipher.DECRYPT_MODE, sec, ivSpec);
-        byte[] bytePlainText = AesCipher.doFinal(fileContent);
-    	
-		return bytePlainText;
+	        // retrieve info
+	        fileRead.read(cipherIV);	
+	        fileRead.read(fileContent);	
+	        fileRead.read(mac);	
+	
+	        // Check mac value
+	        Mac macCheck = Mac.getInstance("HmacSHA256");
+			SecretKeySpec secret = new SecretKeySpec(passwd.getBytes(), macCheck.getAlgorithm());
+			macCheck.init(secret);
+			byte[] auth = macCheck.doFinal(fileContent);
+			
+			// if the mac don't match, the file has been modified
+			if(!Arrays.equals(mac, auth)) 
+				throw new ContentMACException();
+			
+	        // generate the key for decryption
+	        byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
+	        Key sec = new SecretKeySpec(pass, "AES");
+	        
+	        // decrypt IV
+	        Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+	        AesCipher.init(Cipher.DECRYPT_MODE, sec);
+	        byte[] iv =  AesCipher.doFinal(cipherIV);
+	       
+	        // With IV, decrypt keys
+	        IvParameterSpec ivSpec = new IvParameterSpec(iv); 
+			AesCipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
+	        AesCipher.init(Cipher.DECRYPT_MODE, sec, ivSpec);
+	        byte[] bytePlainText = AesCipher.doFinal(fileContent);
+	    	
+	        fileRead.close();
+	        
+			return bytePlainText;
     	
         } catch (IOException | NoSuchAlgorithmException| IllegalBlockSizeException | NoSuchPaddingException 
         		| BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
+
 			e.printStackTrace();
 		} 
     	return null;
@@ -290,7 +296,7 @@ public class DVDPlayer {
             String encFilename = args[2];
             
             DVDPlayer player = new DVDPlayer(playerId, passwd);
-            
+
             /* 
              * ==========================================
              *       Reading the file with the keys
@@ -299,6 +305,7 @@ public class DVDPlayer {
 
             byte[] rawKeys = player.decryptKeys( playerId, passwd);
             HashMap<Long, byte[]> keys = player.generateKeys(rawKeys);
+
 
             player.decryptContent(encFilename, keys);
         }catch(PlayerRevokedException e){
@@ -430,4 +437,5 @@ public class DVDPlayer {
         }    
     }
  
+
 }//end class
