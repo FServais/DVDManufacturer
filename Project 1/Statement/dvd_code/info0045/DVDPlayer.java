@@ -13,19 +13,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
-
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.MessageDigest;
-
 import java.util.*;
-import java.util.Arrays;
-import java.util.HashMap;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -101,6 +96,7 @@ public class DVDPlayer {
             fin.read(keySize_arr);
             keySize = keySize_arr[0];
             
+            // Keys of the DVD
             HashMap<Long, byte[]> nodesKeys = new HashMap<Long, byte[]>();
             
             for(int i = 0 ; i < numOfKeys ; ++i){
@@ -134,13 +130,14 @@ public class DVDPlayer {
             fin.read(fileWithoutMac);
             
             fin.close();
-        
+            
             /* 
              * ==========================================
              *       		Decryption
              * ==========================================
              */
             
+            // Iterate though keys of the player (33 keys)
             Iterator<Map.Entry<Long, byte[]>> it_keys_file = keys.entrySet().iterator();
             while(it_keys_file.hasNext()){
                 Map.Entry<Long, byte[]> pair = (Map.Entry<Long, byte[]>) it_keys_file.next();
@@ -155,6 +152,7 @@ public class DVDPlayer {
                 byte[] keyFile = nodesKeys.get(nodeID);
                 
                 Cipher keyCipher = Cipher.getInstance("AES");
+                
                 keyCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
                 byte[] plain_kt = keyCipher.doFinal(keyFile);
                                 
@@ -207,12 +205,12 @@ public class DVDPlayer {
     public HashMap<Long, byte[]> generateKeys( byte[] rawKeys) {
     	
     	HashMap<Long, byte[]> keys = new HashMap<>();
-    	
-    	for(int i = 0; i+24 < rawKeys.length ; i+=24){
+    	for(int i = 0; i < rawKeys.length ; i+=24){
     		// 8 first bytes are the node Id
     		Long nodeId = (new BigInteger(Arrays.copyOfRange(rawKeys, i, i+8))).longValue();
     		// 16 last ones are the key
     		byte[] key = Arrays.copyOfRange(rawKeys, i+8, i+24);
+    		
     		keys.put(nodeId, key);
     	}
     	return keys;
@@ -240,20 +238,7 @@ public class DVDPlayer {
         fileRead.read(cipherIV);	
         fileRead.read(fileContent);	
         fileRead.read(mac);	
-        /*
-<<<<<<< HEAD
-        byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
-        Key sec = new SecretKeySpec(pass, "AES");
 
-        fileRead.close();
-        
-		Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        AesCipher.init(Cipher.DECRYPT_MODE, sec);
-        byte[] bytePlainText = AesCipher.doFinal(fileContent);
-    	
-        Mac macCheck = Mac.getInstance("HmacSHA1");
-=======
-*/
         // Check mac value
         Mac macCheck = Mac.getInstance("HmacSHA256");
 

@@ -247,7 +247,7 @@ public class DVDManufacturer{
             HashMap<Long, byte[]> setKeys = new HashMap<Long, byte[]>();
             
             for(long id : coverIds)
-                setKeys.put(id, pk.generateKey(id, aacsPasswd.getBytes()));
+                setKeys.put(id, pk.generateKey(id, KeyTree.createAESKeyMaterial(aacsPasswd)));
             
             
             /* 
@@ -264,9 +264,8 @@ public class DVDManufacturer{
             while(it.hasNext()){
                 Map.Entry<Long, byte[]> pair = it.next();
                 keyCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(pair.getValue(), "AES"));
-                
                 encryptionsKt.put(pair.getKey(), keyCipher.doFinal(ktBytes));
-            }
+               }
             
             
             /* 
@@ -294,6 +293,8 @@ public class DVDManufacturer{
                 // node||key
                 addArrayToListByte(encryption, longToBytes(pair.getKey())); 
                 addArrayToListByte(encryption, pair.getValue());
+                
+                //System.out.println("<Key ; Value> : <" + pair.getKey() + " ; <" + DatatypeConverter.printHexBinary(pair.getValue()) + ">");
             }
             
             encryption.add(ivSize);
@@ -301,7 +302,8 @@ public class DVDManufacturer{
             
             addArrayToListByte(encryption, intToBytes(contentSize));
             addArrayToListByte(encryption, encryptedBytes); //Content
-
+            
+            
             /* 
              * ==========================================
              *                Generate MAC
@@ -328,7 +330,7 @@ public class DVDManufacturer{
      * @return K_Enc.
      */
     private byte[] deriveKeyEnc(byte[] kt){
-        SecretKeySpec ktSpec = new SecretKeySpec(kt, "HmacSHA1");
+        SecretKeySpec ktSpec = new SecretKeySpec(kt, "HmacMD5");
         
         Mac mac;
         try {
