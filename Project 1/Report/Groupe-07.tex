@@ -68,6 +68,62 @@ This section focuses on the keyfile generation. First we will explain how we der
 
 \section{\texttt{DVDManufacturer}}
 
+The first step of the \texttt{main} function of the class is to parse the revocation list in order to get the unauthorized players. Given that list, the AACS password the title of the file and the path to the file to encrypt, the method \texttt{encryptContent} that takes care of reading the file to encrypt and writing the encrypted content. It also asks \texttt{KeyTree} to get the cover id's depending on the revocation list.
+\paragraph{}
+The encryption part is done by \texttt{encrypt} and has several steps : 
+\begin{enumerate}
+	\item Generation of $K_t$ : Usage of \texttt{KeyGenerator}.
+	
+	\item Generation of $K_enc$ and $K_mac$ : 
+	\begin{itemize}	
+		\item $K_{enc} = HMAC(K_t, \text{"enc"})$ using \texttt{Mac} with MD5.
+		\item $K_{mac} = HMAC(K_t, \text{"mac"})$ using \texttt{Mac} with SHA1. 
+	\end{itemize}
+	
+	\item Encryption of the content : Using AES in CTR mode. The initialization vector is also recovered to be stored later, in order to be allowed to decrypt it afterwards. 
+	
+	\item Computation of the cover : From the cover id's, it computes the cover of the keys thanks to \texttt{PlayerKeys}.
+
+	\item Encryption of $K_t$ : $K_t$ is encrypted with the cover and the pairs <node, encrypted $K_t$> are stored in a \texttt{HashMap}.
+
+	\item Write in the file : Finally, the data are aggregated in an array of byte, which is encrypted and stored in the file following the format in \textsc{Table} \ref{format}.
+\end{enumerate}
+
+\renewcommand{\arraystretch}{1.6}
+\begin{table}[h]
+	\center
+	\begin{tabular}{|c|c|}
+		\hline
+		\textbf{Item} & \textbf{Number of bytes in the file (bytes)}\\
+		\hline
+		Size of the title & 4\\
+		\hline
+		Title & 'Size of the title'\\
+		\hline
+		Number of pairs <node ; key> & 4\\
+		\hline
+		Size of the node & 1\\
+		\hline
+		Size of the key & 1\\
+		\hline
+		Node || Key & ('Size of the node' + 'Size of the key') $\times$ 'Number of pairs'\\
+		\hline
+		Size of the IV & 1\\
+		\hline
+		IV & 'Size of the IV'\\
+		\hline
+		Size of the content & 4\\
+		\hline
+		Content & 'Size of the content'\\
+		\hline
+		Mac & 64\\ 
+		\hline
+	\end{tabular}
+	\caption{Format of file}
+	\label{format}
+\end{table}
+
+
 \section{\texttt{DVDPlayer}}
 \subsection{Retrieving the keys}
 This part occurs in two steps : decryption and analyse of the keys, these actions are performed by \texttt{decryptKeys} and \texttt{generateKeys} respectively.

@@ -252,7 +252,7 @@ public class DVDManufacturer{
             
             /* 
              * ==========================================
-             *      Encrypt K_t with set of keys
+             *       Encrypt K_t with set of keys
              * ==========================================
              */
             
@@ -292,9 +292,7 @@ public class DVDManufacturer{
                 Map.Entry<Long, byte[]> pair = it_bytes.next();
                 // node||key
                 addArrayToListByte(encryption, longToBytes(pair.getKey())); 
-                addArrayToListByte(encryption, pair.getValue());
-                
-                //System.out.println("<Key ; Value> : <" + pair.getKey() + " ; <" + DatatypeConverter.printHexBinary(pair.getValue()) + ">");
+                addArrayToListByte(encryption, pair.getValue());                
             }
             
             encryption.add(ivSize);
