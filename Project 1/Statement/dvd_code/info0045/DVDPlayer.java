@@ -137,7 +137,7 @@ public class DVDPlayer {
         
             /* 
              * ==========================================
-             *       		Reading the DVD
+             *       		Decryption
              * ==========================================
              */
             
@@ -210,9 +210,9 @@ public class DVDPlayer {
     	
     	for(int i = 0; i+24 < rawKeys.length ; i+=24){
     		// 8 first bytes are the node Id
-    		Long nodeId = (new BigInteger(Arrays.copyOfRange(rawKeys, i, i+7))).longValue();
+    		Long nodeId = (new BigInteger(Arrays.copyOfRange(rawKeys, i, i+8))).longValue();
     		// 16 last ones are the key
-    		byte[] key = Arrays.copyOfRange(rawKeys, i+8, i+23);
+    		byte[] key = Arrays.copyOfRange(rawKeys, i+8, i+24);
     		keys.put(nodeId, key);
     	}
     	return keys;
@@ -289,6 +289,8 @@ public class DVDPlayer {
     	return null;
 
     }
+    
+    
     // Parse the command line and decrypt the data.
     // Usage: DVDPlayer <player id> <player keyfile passwd> <encrypted file>
     public static void main(String[] args){

@@ -278,7 +278,7 @@ public class DVDManufacturer{
             int titleSize = content_title.length();
             int numOfKeys = setKeys.size();
             byte nodeSize = 8; // Node in a long -> 8 bytes
-            byte keySize = 48; 
+            byte keySize = (byte) encryptionsKt.entrySet().iterator().next().getValue().length;
             byte ivSize = (byte) IV.length;
             int contentSize = encryptedBytes.length;
             
