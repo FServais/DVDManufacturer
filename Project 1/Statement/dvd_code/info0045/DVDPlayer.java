@@ -15,15 +15,27 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.nio.ByteBuffer;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/Fabs
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+<<<<<<< HEAD
 import java.util.Arrays;
 import java.util.HashMap;
 import java.security.MessageDigest;
 import java.util.*;
+=======
+import java.security.MessageDigest;
+
+import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+>>>>>>> origin/Fabs
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -135,7 +147,7 @@ public class DVDPlayer {
         
             /* 
              * ==========================================
-             *       		Reading the DVD
+             *       		Decryption
              * ==========================================
              */
             
@@ -169,7 +181,7 @@ public class DVDPlayer {
                 byte[] k_enc = deriveKeyEnc(plain_kt);
                 
                 // Decrypt
-                SecretKey kEncSpec = new SecretKeySpec(k_enc, "AES");
+                SecretKeySpec kEncSpec = new SecretKeySpec(k_enc, "AES");
                 Cipher cipher = null;
                 cipher = Cipher.getInstance("AES/CTR/PKCS5Padding");
                 cipher.init(Cipher.DECRYPT_MODE, kEncSpec, new IvParameterSpec(iv));
@@ -185,14 +197,15 @@ public class DVDPlayer {
 
             fout.close();
             
-            if(!nodeFound)
-            	throw new PlayerRevokedException();
-            
-            new File(encFilename).delete();
-            
         }catch( Exception e){
             e.printStackTrace();
         }
+        
+        if(!nodeFound)
+        	throw new PlayerRevokedException();
+        
+        new File(encFilename).delete();
+        
     }//end decryptContent()
     
     /**
@@ -207,9 +220,9 @@ public class DVDPlayer {
     	
     	for(int i = 0; i+24 < rawKeys.length ; i+=24){
     		// 8 first bytes are the node Id
-    		Long nodeId = (new BigInteger(Arrays.copyOfRange(rawKeys, i, i+7))).longValue();
+    		Long nodeId = (new BigInteger(Arrays.copyOfRange(rawKeys, i, i+8))).longValue();
     		// 16 last ones are the key
-    		byte[] key = Arrays.copyOfRange(rawKeys, i+8, i+23);
+    		byte[] key = Arrays.copyOfRange(rawKeys, i+8, i+24);
     		keys.put(nodeId, key);
     	}
     	return keys;
@@ -241,18 +254,6 @@ public class DVDPlayer {
 
         // Check mac value
         Mac macCheck = Mac.getInstance("HmacSHA256");
-
-        byte[] pass = KeyTree.createAESKeyMaterial(passwd); 
-        Key sec = new SecretKeySpec(pass, "AES");
-
-        fileRead.close();
-        
-		Cipher AesCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        AesCipher.init(Cipher.DECRYPT_MODE, sec);
-        byte[] bytePlainText = AesCipher.doFinal(fileContent);
-    	
-      
-
 		SecretKeySpec secret = new SecretKeySpec(passwd.getBytes(), macCheck.getAlgorithm());
 		macCheck.init(secret);
 		byte[] auth = macCheck.doFinal(fileContent);
@@ -286,6 +287,8 @@ public class DVDPlayer {
     	return null;
 
     }
+    
+    
     // Parse the command line and decrypt the data.
     // Usage: DVDPlayer <player id> <player keyfile passwd> <encrypted file>
     public static void main(String[] args){
@@ -300,7 +303,6 @@ public class DVDPlayer {
             String encFilename = args[2];
             
             DVDPlayer player = new DVDPlayer(playerId, passwd);
-            
 
             /* 
              * ==========================================
@@ -310,14 +312,9 @@ public class DVDPlayer {
 
             byte[] rawKeys = player.decryptKeys( playerId, passwd);
             HashMap<Long, byte[]> keys = player.generateKeys(rawKeys);
-            for(Long i : keys.keySet()){
-            	System.out.println(i);
-            	System.out.println(DatatypeConverter.printHexBinary(keys.get(i)));
-            }
-           
-            player.decryptContent(encFilename, keys);
 
-        
+
+            player.decryptContent(encFilename, keys);
         }catch(PlayerRevokedException e){
             System.err.println("Unable to decrypt content: Player revoked");
         }catch( ContentMACException e){
@@ -447,5 +444,5 @@ public class DVDPlayer {
         }    
     }
  
->>>>>>> origin/Fabs
+
 }//end class

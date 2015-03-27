@@ -20,8 +20,8 @@ import javax.crypto.spec.SecretKeySpec;
 public class PlayerKeys{
 	
 	/**
-	 * generateKey : This method creates a AES key based on its parameters
-	 * @param nodeId id of the node corresponding to the key to be generated in the KeyTree
+	 * This method creates a AES key based on its parameters
+	 * @param nodeId  id of the node corresponding to the key to be generated in the KeyTree
 	 * @param aacsKey AACS key 
 	 * @return an array of 16 bytes containing the key 
 	 */
@@ -45,10 +45,10 @@ public class PlayerKeys{
 	}
 	
 	/**
-	 * concat : given to byte arrays, returns an array of the two arrays concatened
+	 * Given to byte arrays, returns an array of the two arrays concatened
 	 * @param a the first byte array
 	 * @param b the second byte array
-	 * @return a bite array containing a then b
+	 * @return a byte array containing a then b
 	 */
 	public byte[] concat(byte[] a, byte[] b) {
 		
@@ -80,7 +80,7 @@ public class PlayerKeys{
     // the keys associated with the node IDs and store them in the file
     // encrypted.
 	/**
-	 * writeKeys : write the encrypted keyfile in the specified file
+	 * Write the encrypted keyfile in the specified file
 	 * @param playerId number of the player
 	 * @param aacsPasswd AACS password
 	 * @param passwd player password
