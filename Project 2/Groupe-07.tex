@@ -58,10 +58,13 @@
 
 \section{Network topology}
 \subsection{Explanation}
-In order to draw the network, we supposed that the network was well structured : for example, a routing algorithm in the network would not have to use the longest prefix match method to find a route in the network, i.e each subnet is well defined by a range of IP addresses. We based our drawing only on the IP addresses. First, we defined the different subnets, most of them were defined only by drawing the firewalls. Then we added all the devices in the right subnet. \\ \\
+In order to draw the network, we supposed that the network was well structured : for example, a routing algorithm in the network would not have to use the longest prefix match method to find a route in the network, i.e each subnet is well defined by a range of IP addresses. We based our drawing only on the IP addresses. First, we defined the different subnets, most of them were defined only by drawing the firewalls. Then we added all the devices in the right subnet.
+\paragraph{}
 
 Once the topology was defined, we tried to guess where should be the NAT's in the network. We know that the  PDNS server, SMTP server and the FTP server need to be accessible from the internet, and we also know that every user from the network must be unreachable from the internet. That is why we put one NAT in front of FW2 (at its interface \texttt{172.14.5.2}) and one NAT before I2 (at its interface \texttt{172.16.4.2}). We notice also that the SSH relay must be reachable from the internet, and for that reason we would configure a static mapping between its private and public address.
+\paragraph{}
 
+We also defined security zones according to the part created by the firewalls. These zones will be used to define security level and priority between them, to organize the rules.
 
 \subsection{Drawing}
 
