@@ -1,0 +1,10 @@
+ip link set eth0 up
+ip address add 172.16.5.2/24 dev eth0
+
+ip route add default via 172.16.5.1
+
+echo "Installation of the DHCP relay"
+dpkg -i /root/dhcp3-common_3.1.1-6+lenny6_i386.deb
+dpkg --unpack /root/dhcp3-relay_3.1.1-6+lenny6_i386.deb
+dhcrelay3 -i eth0 172.16.6.2
+echo "Installation OK"

@@ -1,0 +1,26 @@
+useradd steve
+cp -r /etc/skel /home/steve
+chown -R steve:steve /home/steve
+chmod go-w /home/steve
+chmod 700 /home/steve/.ssh
+chmod 700 /home/steve/.ssh/id_rsa
+chmod 600 /home/steve/.ssh/authorized_keys
+mkdir /home/steve/.mutt
+mkdir /home/steve/.mutt/cache
+
+useradd tim
+cp -r /etc/skel /home/tim
+chown -R tim:tim /home/tim
+chmod go-w /home/tim
+chmod 700 /home/tim/.ssh
+chmod 700 /home/tim/.ssh/id_rsa
+chmod 600 /home/tim/.ssh/authorized_keys
+mkdir /home/tim/.mutt
+mkdir /home/tim/.mutt/cache
+
+echo "steve:steve" | chpasswd
+echo "tim:tim" | chpasswd
+
+dpkg -i /root/rsync_3.0.3-2_i386.deb
+ifup eth0
+

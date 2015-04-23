@@ -1,0 +1,30 @@
+ip link set eth0 up
+ip address add 172.16.6.3/24 dev eth0
+
+ip link set eth1 up
+ip address add 172.16.7.3/24 dev eth1
+
+route add -net 172.16.8.0/24 gw 172.16.7.1
+route add -net 172.16.9.0/24 gw 172.16.7.1
+ip route add default via 172.16.6.1
+
+useradd steve
+cp -r /etc/skel /home/steve
+chown -R steve:steve /home/steve
+chmod go-w /home/steve
+chmod 700 /home/steve/.ssh
+chmod 700 /home/steve/.ssh/id_rsa
+chmod 600 /home/steve/.ssh/authorized_keys
+
+useradd tim
+cp -r /etc/skel /home/tim
+chown -R tim:tim /home/tim
+chmod go-w /home/tim
+chmod 700 /home/tim/.ssh
+chmod 700 /home/tim/.ssh/id_rsa
+chmod 600 /home/tim/.ssh/authorized_keys
+
+echo "steve:steve" | chpasswd
+echo "tim:tim" | chpasswd
+
+/etc/init.d/ssh start

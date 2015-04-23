@@ -1,0 +1,19 @@
+ip link set eth0 up
+ip address add 172.14.6.3/24 dev eth0
+
+ip route add default via 172.14.6.1
+
+cp /root/httpd.conf /etc/apache2/
+
+/etc/init.d/apache2 start
+
+groupadd ftpusers
+
+useradd steve -g ftpusers -s /bin/false
+useradd tim -g ftpusers -s /bin/false
+
+echo "steve:steve" | chpasswd
+echo "tim:tim" | chpasswd
+
+echo /bin/false >> /etc/shells
+/etc/init.d/proftpd start

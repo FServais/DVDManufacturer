@@ -1,0 +1,30 @@
+ip link set eth0 up
+ip address add 172.14.7.2/24 dev eth0
+
+ip route add default via 172.14.7.1
+
+echo "Installation of the mail server"
+export DEBIAN_FRONTEND=noninteractive
+dpkg -i /root/libltdl3_1.5.26-4+lenny1_i386.deb
+dpkg -i --force-confold --force-confdef /root/libfam0_2.7.0-13.3+lenny1_i386.deb
+dpkg -i /root/courier-authlib_0.61.0-1+lenny1_i386.deb
+dpkg -i /root/courier-authlib-userdb_0.61.0-1+lenny1_i386.deb
+dpkg -i /root/courier-authdaemon_0.61.0-1+lenny1_i386.deb
+dpkg -i /root/courier-base_0.60.0-2_i386.deb
+dpkg -i /root/courier-pop_0.60.0-2_i386.deb
+
+/etc/init.d/courier-pop start
+
+cp /root/update-exim4.conf.conf /etc/exim4/
+/etc/init.d/exim4 start
+
+useradd steve
+useradd tim
+echo "steve:steve" | chpasswd
+echo "tim:tim" | chpasswd
+cp -r /etc/skel /home/steve
+cp -r /etc/skel /home/tim
+maildirmake /home/steve/Maildir
+maildirmake /home/tim/Maildir
+chown -R steve:steve /home/steve
+chown -R tim:tim /home/tim

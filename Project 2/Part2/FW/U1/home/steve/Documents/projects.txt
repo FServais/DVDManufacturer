@@ -1,0 +1,3 @@
+This is the content of a file of Steve :
+Project piPhone 8: Thinner, Bigger, Greater!
+Project piCar : Must correct bug of not stopping when people cross the road in front of car... 

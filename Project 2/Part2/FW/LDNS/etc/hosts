@@ -1,0 +1,15 @@
+172.14.6.3 www.pear2pear.apl
+172.14.7.2 mail.pear2pear.apl
+172.16.6.3 ssh.pear2pear.apl
+172.16.7.3 ssh.pear2pear.apl
+172.14.6.2 ssh2.pear2pear.apl
+172.16.9.2 rsync.pear2pear.apl
+
+172.16.8.3 I1
+172.16.9.2 RSYNC
+172.16.5.2 DHCP_R2
+172.16.8.2 DHCP_R1
+
+172.14.5.3 PDNS
+172.14.7.2 SMTP
+172.14.6.3 web
