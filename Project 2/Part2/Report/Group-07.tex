@@ -105,9 +105,9 @@
 		\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
 		%4 & 9 & 172.14.6.3 & 80 & Any & Any & TCP & Allow & HTTP web server\\
 		%4 & 10 & 172.14.6.3 & 443 & Any & Any & TCP & Allow & HTTPS web server\\
-		%4 & 11 & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data\\
+		4 & & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data (reply)\\
 		%4 & 12 & 172.14.6.3 & 21 & Any & Any & TCP & Allow & FTP control\\
-
+		4 & & 172.14.6.3 & Any & Any & Any & Any & Deny & Rejects other\\
 	\end{tabular}
 	\caption{Firewall 1}
 \end{table}
