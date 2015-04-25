@@ -93,17 +93,21 @@
 		4 & 2 & Any & Any & 172.14.5.3 & 53 & Any & Deny & Not a DNS request\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 4 : Outgoing rules}}\\
-		4 & 3 & 172.14.5.3 & 53 & Any & Any & UDP & Allow & DNS reply to anywhere\\
+		%4 & 3 & 172.14.5.3 & 53 & Any & Any & UDP & Allow & DNS reply to anywhere\\
 		4 & 4 & 172.14.5.3 & 53 & Any & Any & Any & Deny & Not a DNS reply\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
 		4 & 5 & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
 		4 & 6 & Any & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server\\
-		4 & 7 & Any & Any & 172.14.6.3 & 21 & TCP & Allow & FTP (command port + data \newline in passive mode)\\
+		4 & 7 & Any & Any & 172.14.6.3 & 21 & TCP & Allow & FTP (command port + data in passive mode)\\
 		4 & 8 & Any & Any & 172.14.6.3 & Any & Any & Deny & Rejects other\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
-		4 & 9 & 172.14.6.3 & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
+		%4 & 9 & 172.14.6.3 & 80 & Any & Any & TCP & Allow & HTTP web server\\
+		%4 & 10 & 172.14.6.3 & 443 & Any & Any & TCP & Allow & HTTPS web server\\
+		%4 & 11 & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data\\
+		%4 & 12 & 172.14.6.3 & 21 & Any & Any & TCP & Allow & FTP control\\
+
 	\end{tabular}
 	\caption{Firewall 1}
 \end{table}
