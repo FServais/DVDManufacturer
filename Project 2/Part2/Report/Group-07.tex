@@ -125,8 +125,25 @@
 % ========================== FW3 ==========================
 At FW2 :
 \begin{itemize}
-	\item Port 3001 : correspond to the requests from 172.16.6.1
-	\item Port 3002 : correspond to the requests from 172.16.5.1
+	\item Port 3001 : correspond to the requests from 172.16.5.2 (DHCP\_R2)
+	\item Port 3002 : correspond to the requests from 172.16.6.2 (DHCP)
+	\item Port 3003 : correspond to the requests from 172.16.6.3 (SSH)
+	\item Port 3004 : correspond to the requests from 172.16.6.4 (HTTP)
+	\item Port 3005 : correspond to the requests from 172.16.6.4 (HTTPS)
+	\item Port 3006 : correspond to the requests from 172.16.6.5 (LDNS)
+	\item Port 3007 : correspond to the requests from 172.16.9.2 (RSYNC)
+	\item Port 3008 : correspond to the requests from 172.16.8.2 (DHCP\_R1)
+	\item Port 3009 : correspond to the requests from 172.16.8.3 (I1)
+	\item Port 3010 to 3260: correspond to the requests from 172.16.8.4...254 (U1)
+	\item Port 3261 to 3514: correspond to the requests from 172.16.5.3...254 (U2)
+
+\end{itemize}
+
+At FW3 :
+\begin{itemize}
+	\item Port 3001 : correspond to the requests from 172.16.4.2:25 (I2)
+	\item Port 3002 : correspond to the requests from 172.16.4.2:587 (I2)
+	\item Port 3003 : correspond to the requests from 172.16.4.2:465 (I2)
 \end{itemize}
 
 \begin{table}[h]
@@ -135,15 +152,15 @@ At FW2 :
 		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 3 : Incoming rules}}\\
-		3 &  & 172.14.5.2 & 3001 & 172.16.4.2 & 22 & TCP & Allow & SSH\\
-		3 &  & 172.14.6.3 & 20 & 172.16.4.2 & Any & TCP & Allow & FTP (data)\\
+		3 &  & 172.14.5.2 & 3003 & 172.16.4.2 & 22 & TCP & Allow & SSH\\
+		3 &  & 172.14.6.3 & 20 & 172.14.6.2 & Any & TCP & Allow & FTP (data)\\
 		3 &  & Any & Any & 172.16.4.2 & Any & Any & Deny & Deny otherwise\\
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 3 : Outgoing rules}}\\
-		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 22 & TCP & Allow & SSH\\
-		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 80 & TCP & Allow & HTTP\\
-		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 443 & TCP & Allow & HTTPS\\
+		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 3003 & TCP & Allow & SSH\\
+		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 3004 & TCP & Allow & HTTP\\
+		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 3005 & TCP & Allow & HTTPS\\
 		3 &  & 172.16.4.2 & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & (P)DNS\\
 		3 &  & 172.16.4.2 & Any & 172.14.6.3 & 21/80 & TCP & Allow & Web\\
 		3 &  & 172.16.4.2 & Any & 172.14.7.2 & 25 & TCP & Allow & SMTP\\
@@ -151,7 +168,8 @@ At FW2 :
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 2 : Incoming rules}}\\
-		2 &  & Any & Any &
+		2 &  & 172.14.5.2.2 & 3261 to 3514 & 172.14.6.2 & Any & TCP & Allow & SMTP from U2\\
+		2 &  & Any & Any & 172.14.6.2 & Any & Any & Deny & Deny otherwise
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 2 : Outgoing rules}}\\
