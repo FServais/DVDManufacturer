@@ -21,33 +21,46 @@ LDNS
 
 I1
 
-    
+    IN : 172.16.8.0, SSH
+    OUT : internet via SSH, network(?) 
 
 
 I2
-
-
+	
+	IN : SSH
+	OUT : internet via SSH, network(?) 
 
 DHCP_R1
 
+	IN : 172.16.8.0
+	OUT : DHCP + l'inverse?
 
 
 DHCP_R2
 
-
+	IN : 172.16.5.0 
+	OUT : DHCP
 
 RSYNC
 
-
+	IN : SSH, ALL secure, except 172.16.8.0
+	OUT : SSH, ALL secure, except 172.16.8.0
 
 
 PDNS
 
+	IN : ALL
+	OUT : ALL
 
 
 Web
-
+	
+	IN : ALL
+	OUT : ALL
 
 
 
 SMTP
+
+	IN : ALL except 172.16.8.0
+	OUT : ALL except 172.16.8.0
