@@ -76,9 +76,6 @@
 	\caption{List of the zones and their components}
 \end{table}
 
-\begin{itemize}
-
-\end{itemize}
 
 \section{Rules}
 \label{sec:Rules}
@@ -117,7 +114,32 @@
 	\caption{Firewall 1}
 \end{table}
 
+% ========================== FW2 ==========================
 
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|c|cc|cc|ccl}
+		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 3 : Incoming rules}}\\
+		3 &  & 172.14.5.2 (FW2) & Any (22???) & 172.16.4.2 & 22 & TCP & Allow & SSH\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 3 : Outgoing rules}}\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 2 : Incoming rules}}\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 2 : Outgoing rules}}\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
+
+
+	\end{tabular}
+	\caption{Firewall 3}
+\end{table}
 
 
 % ========================== FW3 ==========================
@@ -146,6 +168,43 @@
 	\end{tabular}
 	\caption{Firewall 3}
 \end{table}
+
+
+% ========================== FW4 ==========================
+
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|c|cc|cc|ccl}
+		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 7 : Incoming rules}}\\
+		7 & 1 & 172.16.7.3 & 22 & 172.16.9.2 & 873 & TCP & Allow & SSH\\
+		7 & 2 & 172.16.8.0 & Any & 172.16.9.2 & 873 & TCP & Allow & \\
+		7 & 3 & Any & Any & Any & Any & Any & Deny & \\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 8 : Incoming rules}}\\
+		8 & 1 & 172.16.7.3 & 22 & 172.16.8.0 & 22 & TCP & Allow & SSH \\
+		8 & 2 & 172.16.6.1 & 3009 & 172.16.8.3... & Any & TCP & Allow & FTP \\
+		8 & 3 & Any & Any & Any & Any & Any & Deny & \\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 8 : Outgoing rules}}\\
+		8 & 1 & 172.16.8.2 & 68 & 172.16.7.2 & 67 & DHCP & Allow & \\
+		8 & 2 & 172.16.8.3... & 80 & 172.16.7.4 & Any & TCP & Allow & HTTP \\
+		8 & 3 & 172.16.8.3... & 443 & 172.16.7.4 & Any & TCP & Allow & HTTPS \\
+		8 & 4 & 172.16.8.3... & 22 & 172.16.7.3 & Any & TCP & Allow & SSH \\
+		8 & 5 & 172.16.8.3... & 873 & 172.16.9.2 & Any & TCP & Allow & RSYNC \\
+		8 & 6 & 172.16.8.3... & 53 & 172.16.7.5 & Any & TCP & Allow & DNS (local) \\
+		8 & 7 & 172.16.8.3... & 80 & 172.14.6.3 & Any & TCP & Allow & HTTP \\
+		8 & 8 & 172.16.8.3... & 443 & 172.14.6.3 & Any & TCP & Allow & HTTPS \\
+		8 & 9 & 172.16.8.3... & Any & 172.14.6.3 & 20 & TCP & Allow & FTP \\
+		8 & 10 & Any & Any & Any & Any & Any & Deny & \\
+		\hline
+		
+	\end{tabular}
+	\caption{Firewall 4}
+\end{table}
+
 
 
 
