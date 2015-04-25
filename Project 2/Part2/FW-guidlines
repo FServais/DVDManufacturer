@@ -8,7 +8,6 @@ SSH
     IN : All
     OUT : I1, I2, RSYNC
 
-
 HTTP(s)
 
     IN : All network
@@ -22,43 +21,37 @@ LDNS
 I1
 
     IN : 172.16.8.0, SSH
-    OUT : internet via SSH, network(?) 
-
+    OUT : SSH, HTTP, LDNS, RSYNC, web
 
 I2
-	
+
 	IN : SSH
-	OUT : internet via SSH, network(?) 
+	OUT : SSH, HTTP, web, SMTP, PDNS
 
 DHCP_R1
 
 	IN : 172.16.8.0
-	OUT : DHCP + l'inverse?
-
+	OUT : DHCP
 
 DHCP_R2
 
-	IN : 172.16.5.0 
+	IN : 172.16.5.0
 	OUT : DHCP
 
 RSYNC
 
 	IN : SSH, ALL secure, except 172.16.8.0
-	OUT : SSH, ALL secure, except 172.16.8.0
-
+	OUT : /
 
 PDNS
 
-	IN : ALL
-	OUT : ALL
-
+	IN : Internet, ALL except 172.16.5.0/24 to 172.16.8.0/24
+	OUT : Internet
 
 Web
-	
+
 	IN : ALL
 	OUT : ALL
-
-
 
 SMTP
 
