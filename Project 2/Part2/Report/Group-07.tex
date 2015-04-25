@@ -83,6 +83,8 @@
 \section{Rules}
 \label{sec:Rules}
 
+% ========================== FW1 ==========================
+
 \begin{table}[h]
 	\center
 	\begin{tabular}{c|c|cc|cc|ccl}
@@ -116,6 +118,34 @@
 \end{table}
 
 
+
+
+% ========================== FW3 ==========================
+
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|c|cc|cc|ccl}
+		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 3 : Incoming rules}}\\
+		3 &  & 172.14.5.2 (FW2) & Any (22???) & 172.16.4.2 & 22 & TCP & Allow & SSH\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 3 : Outgoing rules}}\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 2 : Incoming rules}}\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 2 : Outgoing rules}}\\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
+
+
+	\end{tabular}
+	\caption{Firewall 3}
+\end{table}
 
 
 
