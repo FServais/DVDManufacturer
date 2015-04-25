@@ -23,9 +23,12 @@
 %Listings : affichage code
 \usepackage{listings}
 
+\geometry{hmargin=2cm}
+
 
 %Elements de la page de garde
 \begin{document}
+
 
 \begin{titlepage}
 
@@ -44,7 +47,6 @@
 \rule{15cm}{1.5pt}
 }
 
-%\geometry{hmargin=2.5cm}
 \end{titlepage}
 
 %DOCUMENT
@@ -121,6 +123,11 @@
 
 
 % ========================== FW3 ==========================
+At FW2 :
+\begin{itemize}
+	\item Port 3001 : correspond to the requests from 172.16.6.1
+	\item Port 3002 : correspond to the requests from 172.16.5.1
+\end{itemize}
 
 \begin{table}[h]
 	\center
@@ -128,13 +135,23 @@
 		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 3 : Incoming rules}}\\
-		3 &  & 172.14.5.2 (FW2) & Any (22???) & 172.16.4.2 & 22 & TCP & Allow & SSH\\
+		3 &  & 172.14.5.2 & 3001 & 172.16.4.2 & 22 & TCP & Allow & SSH\\
+		3 &  & 172.14.6.3 & 20 & 172.16.4.2 & Any & TCP & Allow & FTP (data)\\
+		3 &  & Any & Any & 172.16.4.2 & Any & Any & Deny & Deny otherwise\\
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 3 : Outgoing rules}}\\
+		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 22 & TCP & Allow & SSH\\
+		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 80 & TCP & Allow & HTTP\\
+		3 &  & 172.16.4.2 & Any & 172.14.5.2 & 443 & TCP & Allow & HTTPS\\
+		3 &  & 172.16.4.2 & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & (P)DNS\\
+		3 &  & 172.16.4.2 & Any & 172.14.6.3 & 21/80 & TCP & Allow & Web\\
+		3 &  & 172.16.4.2 & Any & 172.14.7.2 & 25 & TCP & Allow & SMTP\\
+		3 &  & 172.16.4.2 & Any & Any & Any & Any & Deny & Deny otherwise\\
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 2 : Incoming rules}}\\
+		2 &  & Any & Any &
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 2 : Outgoing rules}}\\
