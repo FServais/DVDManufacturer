@@ -73,7 +73,7 @@
 		8 & DHCP\_R1, I1, U1\\
 		9 & Internet\\
 	\end{tabular}
-	\caption{List of the zones and their composition}
+	\caption{List of the zones and their components}
 \end{table}
 
 \begin{itemize}
@@ -86,15 +86,15 @@
 \begin{table}[h]
 	\center
 	\begin{tabular}{c|c|cc|cc|ccl}
-		Zone & Number & Source & Port & Dest & Port & Prot & Action & \multicolumn{1}{c}{Comments}\\
+		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 4 : Incoming rules}}\\
 		4 & 1 & Any & Any & 172.14.5.3 & 53 & UDP & Allow & DNS requests from anywhere\\
-		4 & 2 & Any & Any & 172.14.5.3 & 53 & Any & Deny & Not a DNS request\\
+		4 & 2 & Any & Any & 172.14.5.3 & Any & Any & Deny & Not a DNS request\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 4 : Outgoing rules}}\\
 		%4 & 3 & 172.14.5.3 & 53 & Any & Any & UDP & Allow & DNS reply to anywhere\\
-		4 & 4 & 172.14.5.3 & 53 & Any & Any & Any & Deny & Not a DNS reply\\
+		4 & 4 & 172.14.5.3 & Any & Any & Any & Any & Deny & Not a DNS reply\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
 		4 & 5 & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
@@ -108,6 +108,9 @@
 		4 & & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data (reply)\\
 		%4 & 12 & 172.14.6.3 & 21 & Any & Any & TCP & Allow & FTP control\\
 		4 & & 172.14.6.3 & Any & Any & Any & Any & Deny & Rejects other\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 9 : Incoming rules}}\\
+
 	\end{tabular}
 	\caption{Firewall 1}
 \end{table}

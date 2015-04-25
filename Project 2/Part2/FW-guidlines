@@ -1,0 +1,53 @@
+DHCP
+
+    IN : DHCP_R1, DHCP_R2
+    OUT : /
+
+SSH
+
+    IN : All
+    OUT : I1, I2, RSYNC
+
+
+HTTP(s)
+
+    IN : All network
+    OUT : Internet
+
+LDNS
+
+    IN : 172.16.5.0/24 to 172.16.8.0/24
+    OUT : PDNS (or Internet ?)
+
+I1
+
+    
+
+
+I2
+
+
+
+DHCP_R1
+
+
+
+DHCP_R2
+
+
+
+RSYNC
+
+
+
+
+PDNS
+
+
+
+Web
+
+
+
+
+SMTP
