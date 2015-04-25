@@ -91,38 +91,37 @@
 	\center
 	\begin{tabular}{c|c|cc|cc|ccl}
 		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
+
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 4 : Incoming rules}}\\
-		4 & 1 & Any & Any & 172.14.5.3 & 53 & UDP & Allow & DNS requests from anywhere\\
-		4 & 2 & Any & Any & 172.14.5.3 & Any & Any & Deny & Not a DNS request\\
+		4 &  & Any & Any & 172.14.5.3 & 53 & UDP & Allow & DNS requests from anywhere\\
+		4 &  & Any & Any & 172.14.5.3 & Any & Any & Deny & Not a DNS request\\
+
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 4 : Outgoing rules}}\\
-		%4 & 3 & 172.14.5.3 & 53 & Any & Any & UDP & Allow & DNS reply to anywhere\\
-		4 & 4 & 172.14.5.3 & Any & Any & Any & Any & Deny & Not a DNS reply\\
+		4 &  & 172.14.5.3 & Any & Any & Any & Any & Deny & Not a DNS reply\\
+
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
-		4 & 5 & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
-		4 & 6 & Any & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server\\
-		4 & 7 & Any & Any & 172.14.6.3 & 21 & TCP & Allow & FTP (command port + data in passive mode)\\
-		4 & 8 & Any & Any & 172.14.6.3 & Any & Any & Deny & Rejects other\\
+		4 &  & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
+		4 &  & Any & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server\\
+		4 &  & Any & Any & 172.14.6.3 & 21 & TCP & Allow & FTP (command port + data in passive mode)\\
+		4 &  & Any & Any & 172.14.6.3 & Any & Any & Deny & Rejects other\\
+
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
-		%4 & 9 & 172.14.6.3 & 80 & Any & Any & TCP & Allow & HTTP web server\\
-		%4 & 10 & 172.14.6.3 & 443 & Any & Any & TCP & Allow & HTTPS web server\\
 		4 & & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data (reply)\\
-		%4 & 12 & 172.14.6.3 & 21 & Any & Any & TCP & Allow & FTP control\\
 		4 & & 172.14.6.3 & Any & Any & Any & Any & Deny & Rejects other\\
+
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 9 : Incoming rules}}\\
-
 	\end{tabular}
 	\caption{Firewall 1}
 \end{table}
 
 
+% ========================== FW2 ==========================
 
-
-% ========================== FW3 ==========================
 At FW2 :
 \begin{itemize}
 	\item Port 3001 : correspond to the requests from 172.16.5.2 (DHCP\_R2)
@@ -138,6 +137,9 @@ At FW2 :
 	\item Port 3261 to 3514: correspond to the requests from 172.16.5.3...254 (U2)
 
 \end{itemize}
+
+
+% ========================== FW3 ==========================
 
 At FW3 :
 \begin{itemize}
