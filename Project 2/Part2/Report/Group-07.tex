@@ -1,0 +1,115 @@
+\documentclass[a4paper,titlepage]{article}
+
+%PACKAGES
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{fancyhdr}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancybox}
+\usepackage{textcomp}
+\usepackage{pdflscape}
+\usepackage{svg}
+
+
+%Symbole euro
+\usepackage{eurosym}
+
+%Listings : affichage code
+\usepackage{listings}
+
+
+%Elements de la page de garde
+\begin{document}
+
+\begin{titlepage}
+
+\begin{figure}
+\centering
+\includegraphics[width=5cm]{logo-ulg.png}
+\end{figure}
+
+
+
+\title{
+\vspace{0.2cm}
+\LARGE{\textbf{Project 2 - Firewalls}} \\ \textsc{Introduction to Computer Security}
+\author{\textbf{Floriane Magera} \small{(S111295})\\\textbf{Fabrice Servais} \small{(S111093})}\\
+\date{March 27, 2015}
+\rule{15cm}{1.5pt}
+}
+
+%\geometry{hmargin=2.5cm}
+\end{titlepage}
+
+%DOCUMENT
+\pagestyle{fancy}
+\lhead{Project 2 : Firewalls}
+\rhead{Introduction to Computer Security}
+
+%Page de garde
+\maketitle
+
+\section{Zones}
+\label{sec:Zones}
+
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|l}
+		Zone & Elements\\
+		\hline
+		1 & web\\
+		2 & SMTP\\
+		3 & I2\\
+		4 & PDNS\\
+		5 & DHCP\_R2, U2\\
+		6 & DHCP, SSH, HTTP, LDNS\\
+		7 & RSYNC\\
+		8 & DHCP\_R1, I1, U1\\
+		9 & Internet\\
+	\end{tabular}
+	\caption{List of the zones and their composition}
+\end{table}
+
+\begin{itemize}
+
+\end{itemize}
+
+\section{Rules}
+\label{sec:Rules}
+
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|c|cc|cc|ccl}
+		Zone & Number & Source & Port & Dest & Port & Prot & Action & \multicolumn{1}{c}{Comments}\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 4 : Incoming rules}}\\
+		4 & 1 & Any & Any & 172.14.5.3 & 53 & UDP & Allow & DNS requests from anywhere\\
+		4 & 2 & Any & Any & 172.14.5.3 & 53 & Any & Deny & Not a DNS request\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 4 : Outgoing rules}}\\
+		4 & 3 & 172.14.5.3 & 53 & Any & Any & UDP & Allow & DNS reply to anywhere\\
+		4 & 4 & 172.14.5.3 & 53 & Any & Any & Any & Deny & Not a DNS reply\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
+		4 & 5 & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
+		4 & 6 & Any & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server\\
+		4 & 7 & Any & Any & 172.14.6.3 & 21 & TCP & Allow & FTP (command port + data \newline in passive mode)\\
+		4 & 8 & Any & Any & 172.14.6.3 & Any & Any & Deny & Rejects other\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
+		4 & 9 & 172.14.6.3 & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
+	\end{tabular}
+	\caption{Firewall 1}
+\end{table}
+
+
+
+
+
+\end{document}
