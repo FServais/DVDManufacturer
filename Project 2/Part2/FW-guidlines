@@ -57,3 +57,8 @@ SMTP
 
 	IN : ALL except 172.16.8.0
 	OUT : ALL except 172.16.8.0
+
+Internet
+
+    IN : PDNS, SSH, HTTP, SMTP
+    OUT : SSH, web, PDNS, SMTP
