@@ -15,6 +15,7 @@ iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 53 --to-desti
 
 #filter
 #zone 6 incoming
+iptables -t filter -A FORWARD -p udp -s 172.16.5.2 --sport 68 -d 172.16.6.2 --dport 67  -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p udp -s 172.16.5.2 --sport 67 -d 172.16.6.2 --dport 67  -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p udp -s 172.16.5.2 --sport 68 -d 172.16.6.2 --dport 67  -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p tcp -d 172.16.6.3 --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
