@@ -11,11 +11,15 @@ T_IP="172.14.3.10"
 
 # Outgoing (change source)
 iptables -t nat -A POSTROUTING -p tcp -s $I2_PRIV_IP -j LOG --log-prefix "[SNAT] : "
-iptables -t nat -A POSTROUTING -p tcp -s $I2_PRIV_IP -j SNAT --to-source $FW3_IP
+iptables -t nat -A POSTROUTING -p tcp -s $I2_PRIV_IP -j MASQUERADE
+iptables -t nat -A POSTROUTING -p udp -s $I2_PRIV_IP -j LOG --log-prefix "[SNAT] : "
+iptables -t nat -A POSTROUTING -p udp -s $I2_PRIV_IP -j MASQUERADE
 
 # Arriving (change dest)
 iptables -t nat -A PREROUTING -p tcp -d $FW3_IP -j LOG --log-prefix "[DNAT] "
 iptables -t nat -A PREROUTING -p tcp -d $FW3_IP -j DNAT --to-destination $I2_PRIV_IP
+iptables -t nat -A POSTROUTING -p udp -d $FW3_IP -j LOG --log-prefix "[SNAT] : "
+iptables -t nat -A POSTROUTING -p udp -d $FW3_IP -j DNAT --to-destination $I2_PRIV_IP
 
 # ================================== FILTER ==================================
 
@@ -100,6 +104,7 @@ iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp 
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $SMTP_IP -d $FW3_IP --dport 995
 
 # SMTP can ask to PDNS
+iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p udp -s $SMTP_IP -d $PDNS_IP --dport 53
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $SMTP_IP -d $PDNS_IP --dport 53
 
 # Deny otherwise

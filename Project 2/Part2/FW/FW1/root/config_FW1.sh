@@ -69,6 +69,7 @@ iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j DROP -s $WEB_I
 
 # All from FW2
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $FW2_IP -o eth0
+iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p udp -s $FW2_IP -o eth0
 
 # SMTP to Internet
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $SMTP_IP -o eth0 --dport 25

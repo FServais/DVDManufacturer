@@ -11,6 +11,7 @@ iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 22 --to-desti
 iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 80 --to-destination 172.16.6.4
 iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 443 --to-destination 172.16.6.4
 iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 53 --to-destination 172.16.6.5
+iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 3128 --to-destination 172.16.6.4
 
 
 #filter
@@ -24,7 +25,7 @@ iptables -t filter -A FORWARD -p tcp -s 172.16.5.0/24 -d 172.16.6.4 --dport 443 
 iptables -t filter -A FORWARD -p tcp -s 172.14.6.2 -d 172.16.6.4 --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p tcp -s 172.14.6.2 -d 172.16.6.4 --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p udp -s 172.16.5.0/24 -d 172.16.6.5 --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
-#zone 6 outgoing 
+#zone 6 outgoing
 iptables -t filter -A FORWARD -p tcp -s 172.16.6.3 --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p tcp -s 172.16.6.4 --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p tcp -s 172.16.6.4 --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
