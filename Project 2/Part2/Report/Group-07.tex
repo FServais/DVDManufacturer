@@ -156,37 +156,42 @@ At FW2 we configured the NAT table as follow :
 		6 & 7 & 172.14.6.2 & Any & 172.16.6.4 & 3128 & TCP & Allow & HTTP redirection with lynx  \\
 		6 & 8 & 172.14.6.2 & Any & 172.16.6.4 & 443 & TCP & Allow & HTTPS \\
 		6 & 9 & 172.16.5.0 & Any & 172.16.6.5 & 53 & UDP & Allow & DNS \\
-		6 & 10 & Any & Any & Any & Any & Any & Deny & \\
+		6 & 10 & Any & Any & 172.16.6.2 & Any & Any & Deny & \\
+		6 & 11 & Any & Any & 172.16.6.3 & Any & Any & Deny & \\
+		6 & 12 & Any & Any & 172.16.6.4 & Any & Any & Deny & \\
+		6 & 13 & Any & Any & 172.16.6.5 & Any & Any & Deny & \\
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 6 : Outgoing rules}}\\
 
-		6 & 1 & 172.16.6.3 & Any & Any & 22 & TCP & Allow & SSH\\
-		6 & 2 & 172.16.6.4 & Any & Any & 80 & TCP & Allow & HTTP\\
-		6 & 3 & 172.16.6.4 & Any & Any & 443 & TCP & Allow & HTTPS\\
-		6 & 4 & 172.16.6.5 & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & DNS \\
-		6 & 4 & 172.16.6.5 & Any & 208.67.222.222 & 53 & UDP/TCP & Allow & prime DNS \\
-		6 & 5 & 172.16.6.2 & 68 & 172.16.5.2 & 67 & UDP & Allow & DHCP \\
-		6 & 6 & Any & Any & Any & Any & Any & Deny & \\
+		6 & 14 & 172.16.6.3 & Any & Any & 22 & TCP & Allow & SSH\\
+		6 & 15 & 172.16.6.4 & Any & Any & 80 & TCP & Allow & HTTP\\
+		6 & 16 & 172.16.6.4 & Any & Any & 443 & TCP & Allow & HTTPS\\
+		6 & 17 & 172.16.6.5 & Any & 172.14.5.3 & 53 & UDP & Allow & DNS \\
+		6 & 18 & 172.16.6.5 & Any & 208.67.222.222 & 53 & UDP & Allow & prime DNS \\
+		6 & 19 & 172.16.6.2 & 68 & 172.16.5.2 & 67 & UDP & Allow & DHCP \\
+		6 & 20 & 172.16.6.2 & Any & Any & Any & Any & Deny & \\
+		6 & 21 & 172.16.6.3 & Any & Any & Any & Any & Deny & \\
+		6 & 22 & 172.16.6.4 & Any & Any & Any & Any & Deny & \\
+		6 & 23 & 172.16.6.5 & Any & Any & Any & Any & Deny & \\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 5 : Incoming rules}}\\
-		5 & 1 & Any & Any & Any & Any & Any & Deny & \\
+		5 & 1 & Any & Any & 172.16.5.0 & Any & Any & Deny & \\
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 5 : Outgoing rules}}\\
-		5 & 1 & 172.16.5.2 & 68 & 172.16.6.2 & 67 & DHCP & Allow & DHCP\\
-		5 & 2 & 172.16.5.3... & Any & 172.16.6.4 & 80 & TCP & Allow & HTTP \\
-		5 & 3 & 172.16.5.3... & Any & 172.16.6.4 & 443 & TCP & Allow & HTTPS \\
-		5 & 4 & 172.16.5.3... & Any & 172.16.6.3 & 22 & TCP & Allow & SSH \\
-		5 & 5 & 172.16.5.3... & Any & 172.16.9.2 & 873 & TCP & Allow & RSYNC \\
-		5 & 6 & 172.16.5.3... & Any & 172.16.6.5 & 53 & UDP/TCP & Allow & DNS (local) \\
-		5 & 7 & 172.16.5.3... & Any & 172.14.6.2 & Any & Any & Allow & Link to FW2 \\
-		5 & 8 & 172.16.5.3... & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server \\
-		5 & 9 & 172.16.5.3... & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server \\
-		5 & 10 & 172.16.5.3... & Any & 172.14.6.3 & 21 & TCP & Allow & FTP web server \\
-		5 & 11 & 172.16.5.3... & Any & 172.14.7.2 & Any & TCP & Allow & SMTP \\
-
-		5 & 12 & Any & Any & Any & Any & Any & Deny & \\
+		5 & 24 & 172.16.5.2 & 68 & 172.16.6.2 & 67 & DHCP & Allow & DHCP\\
+		5 & 25 & 172.16.5.3... & Any & 172.16.6.4 & 80 & TCP & Allow & HTTP \\
+		5 & 26 & 172.16.5.3... & Any & 172.16.6.4 & 443 & TCP & Allow & HTTPS \\
+		5 & 27 & 172.16.5.3... & Any & 172.16.6.3 & 22 & TCP & Allow & SSH \\
+		5 & 28 & 172.16.5.3... & Any & 172.16.9.2 & 873 & TCP & Allow & RSYNC \\
+		5 & 29 & 172.16.5.3... & Any & 172.16.6.5 & 53 & UDP/TCP & Allow & DNS (local) \\
+		5 & 30 & 172.16.5.3... & Any & 172.14.6.2 & Any & Any & Allow & Link to FW2 \\
+		5 & 31 & 172.16.5.3... & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server \\
+		5 & 32 & 172.16.5.3... & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server \\
+		5 & 33 & 172.16.5.3... & Any & 172.14.6.3 & 21 & TCP & Allow & FTP web server \\
+		5 & 34 & 172.16.5.3... & Any & 172.14.7.2 & Any & TCP & Allow & SMTP \\
+		5 & 35 & Any & Any & Any & Any & Any & Deny & \\
 
 
 	\end{tabular}
@@ -255,26 +260,29 @@ At FW2 we configured the NAT table as follow :
 		\multicolumn{9}{l}{\textbf{Zone 7 : Incoming rules}}\\
 		7 & 1 & 172.16.7.3 & Any & 172.16.9.2 & 22 & TCP & Allow & SSH\\
 		7 & 2 & 172.16.8.0 & Any & 172.16.9.2 & 873 & TCP & Allow & \\
-		7 & 3 & Any & Any & Any & Any & Any & Deny & \\
+		7 & 3 & Any & Any & 172.16.9.2 & Any & Any & Deny & \\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 7 : Outgoing rules}}\\
-		7 & 1 & Any & Any & Any & Any & Any & Deny & \\
+		7 & 4 & 172.16.9.2 & Any & Any & Any & Any & Deny & \\
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 8 : Incoming rules}}\\
-		8 & 1 & 172.16.7.2 & 68 &  172.16.8.2 & 67 & UDP & Allow & DHCP\\
-		8 & 2 & 172.16.7.3 & Any & 172.16.8.0 & 22 & TCP & Allow & SSH \\
-		8 & 3 & Any & Any & Any & Any & Any & Deny & \\
+		8 & 5 & 172.16.7.2 & 68 &  172.16.8.2 & 67 & UDP & Allow & DHCP\\
+		8 & 6 & 172.16.7.3 & Any & 172.16.8.0 & 22 & TCP & Allow & SSH \\
+		8 & 7 & Any & Any & 172.16.8.0 & Any & Any & Deny & \\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 8 : Outgoing rules}}\\
-		8 & 1 & 172.16.8.2 & 68 & 172.16.7.2 & 67 & UDP & Allow & DHCP\\
-		8 & 2 & 172.16.8.3... & Any & 172.16.7.4 & 80 & TCP & Allow & HTTP \\
-		8 & 3 & 172.16.8.3... & Any & 172.16.7.4 & 3128 & TCP & Allow & HTTP for lynx\\
-		8 & 4 & 172.16.8.3... & Any & 172.16.7.4 & 443 & TCP & Allow & HTTPS \\
-		8 & 5 & 172.16.8.3... & Any & 172.16.7.3 & 22 & TCP & Allow & SSH \\
-		8 & 6 & 172.16.8.3... & Any & 172.16.9.2 & 873 & TCP & Allow & RSYNC \\
-		8 & 7 & 172.16.8.3... & Any & 172.16.7.5 & 53 & UDP & Allow & DNS (local) \\
-		8 & 8 & Any & Any & Any & Any & Any & Deny & \\
+		8 & 8 & 172.16.8.2 & 68 & 172.16.7.2 & 67 & UDP & Allow & DHCP\\
+		8 & 9 & 172.16.8.3... & Any & 172.16.7.4 & 80 & TCP & Allow & HTTP \\
+		8 & 10 & 172.16.8.3... & Any & 172.16.7.4 & 3128 & TCP & Allow & HTTP for lynx\\
+		8 & 11 & 172.16.8.3... & Any & 172.16.7.4 & 443 & TCP & Allow & HTTPS \\
+		8 & 12 & 172.16.8.3... & Any & 172.16.7.3 & 22 & TCP & Allow & SSH \\
+		8 & 13 & 172.16.8.3... & Any & 172.16.9.2 & 873 & TCP & Allow & RSYNC \\
+		8 & 14 & 172.16.8.3... & Any & 172.16.7.5 & 53 & UDP & Allow & DNS (local) \\
+		8 & 15 & 172.16.8.2 & Any & Any & Any & Any & Deny & \\
+		8 & 16 & 172.16.8.3 & Any & Any & Any & Any & Deny & \\
+		8 & 17 & 172.16.8.0 & Any & Any & Any & Any & Deny & \\
+		8 & 18 & Any & Any & Any & Any & Any & Deny & \\
 		\hline
 
 	\end{tabular}
