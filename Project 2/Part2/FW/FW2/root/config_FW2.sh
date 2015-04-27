@@ -40,7 +40,8 @@ iptables -t filter -A FORWARD -p tcp -s 172.14.6.2 -d 172.16.6.4 --dport 3128 -m
 iptables -t filter -A FORWARD -p tcp -s 172.16.5.0/24 -d 172.16.6.4 --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p tcp -s 172.16.5.0/24 -d 172.16.6.4 --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
 
-# HTTP devices like I2
+# HTTP for I2
+iptables -t filter -A FORWARD -p tcp -s 172.14.6.2 -d 172.16.6.4 --dport 3128 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p tcp -s 172.14.6.2 -d 172.16.6.4 --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -t filter -A FORWARD -p tcp -s 172.14.6.2 -d 172.16.6.4 --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
 
@@ -70,12 +71,6 @@ iptables -t filter -A FORWARD -p udp -s 172.16.6.5 -d 172.14.5.3 --dport 53 -m s
 
 # LDNS communicate with this prime DNS
 iptables -t filter -A FORWARD -p udp -s 172.16.6.5 -d 208.67.222.222 --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
-
-# SSH may reach FW3
-iptables -t filter -A FORWARD -s 172.16.6.3 -d 172.14.6.2 -m state --state NEW,ESTABLISHED -j ACCEPT
-
-# HTTP(S) may reach FW3
-iptables -t filter -A FORWARD -s 172.16.6.4 -d 172.14.6.2 -m state --state NEW,ESTABLISHED -j ACCEPT
 
 # Deny otherwise
 iptables -t filter -A FORWARD -j LOG --log-prefix "[FORW] DROP : " -s 172.16.6.2

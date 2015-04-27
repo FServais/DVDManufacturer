@@ -83,78 +83,99 @@
 \label{sec:Rules}
 
 % ========================== FW1 ==========================
-\begin{landscape}
-	\vspace*{\fill}
-	\begin{table}[h]
-		\center
-		\begin{tabular}{c|c|cc|cc|ccl}
-			Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 4 : Incoming rules}}\\
-			4 &  & Any & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & DNS requests from anywhere\\
-			4 &  & Any & Any & 172.14.5.3 & Any & Any & Deny & Not a DNS request\\
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|c|cc|cc|ccl}
+		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 4 : Outgoing rules}}\\
-			4 &  & 172.14.5.3 & Any & 208.67.222.222 & 53 & UDP/TCP & Allow & Ask other DNS\\
-			4 &  & 172.14.5.3 & Any & Any & Any & Any & Deny & Not a DNS reply\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 4 : Incoming rules}}\\
+		4 &  & Any & Any & 172.14.5.3 & 53 & UDP & Allow & DNS requests from anywhere\\
+		4 &  & Any & Any & 172.14.5.3 & Any & Any & Deny & Not a DNS request\\
 
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
-			1 &  & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP (web server)\\
-			1 &  & Any & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS (web server)\\
-			1 &  & 172.14.5.2 & Any & 172.14.6.3 & 21 & TCP & Allow & FTP from network (FW2)\\
-			1 &  & 172.14.6.2 & Any & 172.14.6.3 & 21 & TCP & Allow & FTP from network (FW3)\\
-			1 &  & Any & Any & 172.14.6.3 & Any & Any & Deny & Deny otherwise\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 4 : Outgoing rules}}\\
+		4 &  & 172.14.5.3 & Any & Any & Any & Any & Deny & Not a DNS reply\\
 
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
-			1 &  & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data\\
-			1 &  & 172.14.6.3 & Any & Any & Any & Any & Deny & Deny otherwise\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
+		4 &  & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server\\
+		4 &  & Any & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server\\
+		4 &  & Any & Any & 172.14.6.3 & 21 & TCP & Allow & FTP (command port + data in passive mode)\\
+		4 &  & Any & Any & 172.14.6.3 & Any & Any & Deny & Rejects other\\
 
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 9 : Incoming rules}}\\
-			9 &  & 172.14.5.3 & Any & 208.67.222.222 & 53 & UDP/TCP & Allow & PDNS populate its cache (see zone 4, outgoing)\\
-			9 &  & 172.14.5.2 & Any & Internet & Any & TCP & Allow & From FW2\\
-			9 &  & 172.14.7.2 & Any & Internet & 25, 587, 465 & TCP & Allow & SMTP to internet\\
-			9 &  & 172.14.6.2 & Any & Internet & Any & TCP & Allow & I2 (through FW3) to internet\\
-			9 &  & Any & Any & Internet & Any & Any & Deny & Deny otherwise\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
+		4 & & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data (reply)\\
+		4 & & 172.14.6.3 & Any & Any & Any & Any & Deny & Rejects other\\
 
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 9 : Outgoing rules}}\\
-			9 &  & Internet & Any & 172.14.5.3 & 53 & TCP/UDP & Allow & Internet searches in PDNS\\
-			9 &  & Internet & Any & 172.14.5.2 & 3003 & TCP & Allow & Internet to SSH\\
-			9 &  & Internet & Any & 172.14.6.3 & 80 & TCP & Allow & Visit website\\
-			9 &  & Internet & Any & 172.14.7.2 & 25, 587, 465 & TCP & Allow & Internet to SMTP\\
-			9 &  & Internet & Any & Any & Any & Deny & Deny otherwise
-
-
-		\end{tabular}
-		\caption{Firewall 1}
-	\end{table}
-	\vspace*{\fill}
-\end{landscape}
-
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 9 : Incoming rules}}\\
+	\end{tabular}
+	\caption{Firewall 1}
+\end{table}
 
 % ========================== FW2 ==========================
 
-At FW2 :
+At FW2 we configured the NAT table as follow :
 \begin{itemize}
-	\item Port 3000 : correspond to the requests from 172.16.6.4 (HTTP, other than :80 and :443)
-	\item Port 3001 : correspond to the requests from 172.16.5.2 (DHCP\_R2)
-	\item Port 3002 : correspond to the requests from 172.16.6.2 (DHCP)
-	\item Port 3003 : correspond to the requests from 172.16.6.3 (SSH)
-	\item Port 3004 : correspond to the requests from 172.16.6.4:80 (HTTP)
-	\item Port 3005 : correspond to the requests from 172.16.6.4:443 (HTTPS)
-	\item Port 3006 : correspond to the requests from 172.16.6.5 (LDNS)
-	\item Port 3007 : correspond to the requests from 172.16.9.2 (RSYNC)
-	\item Port 3008 : correspond to the requests from 172.16.8.2 (DHCP\_R1)
-	\item Port 3009 : correspond to the requests from 172.16.8.3 (I1)
-	\item Port 3010 to 3260: correspond to the requests from 172.16.8.4...254 (U1)
-	\item Port 3261 to 3514: correspond to the requests from 172.16.5.3...254 (U2)
-
+\item For outgoing traffic, we used MASQUERADE in order to have dynamic mappings.
+\item For incoming traffic, we based ourselves on the destination port. For example, the port 22 meant that the destination had to be replaced by SSH address with DNAT. Only the servers are available.
 \end{itemize}
+
+
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|c|cc|cc|ccl}
+		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 6 : Incoming rules}}\\
+		6 & 1 & 172.16.5.2 & 68 & 172.16.6.2 & 67 & UDP & Allow & DHCP \\
+		6 & 2 & Any & Any & 172.16.6.3 & 22 & TCP & Allow & SSH \\
+		6 & 3 & 172.16.5.0 & Any & 172.16.6.4 & 80 & TCP & Allow & HTTP \\
+		6 & 4 & 172.16.5.0 & Any & 172.16.6.4 & 3128 & TCP & Allow & HTTP redirection with lynx \\
+		6 & 5 & 172.16.5.0 & Any & 172.16.6.4 & 443 & TCP & Allow & HTTPS \\
+		6 & 6 & 172.14.6.2 & Any & 172.16.6.4 & 80 & TCP & Allow & HTTP \\
+		6 & 7 & 172.14.6.2 & Any & 172.16.6.4 & 3128 & TCP & Allow & HTTP redirection with lynx  \\
+		6 & 8 & 172.14.6.2 & Any & 172.16.6.4 & 443 & TCP & Allow & HTTPS \\
+		6 & 9 & 172.16.5.0 & Any & 172.16.6.5 & 53 & UDP & Allow & DNS \\
+		6 & 10 & Any & Any & Any & Any & Any & Deny & \\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 6 : Outgoing rules}}\\
+
+		6 & 1 & 172.16.6.3 & Any & Any & 22 & TCP & Allow & SSH\\
+		6 & 2 & 172.16.6.4 & Any & Any & 80 & TCP & Allow & HTTP\\
+		6 & 3 & 172.16.6.4 & Any & Any & 443 & TCP & Allow & HTTPS\\
+		6 & 4 & 172.16.6.5 & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & DNS \\
+		6 & 4 & 172.16.6.5 & Any & 208.67.222.222 & 53 & UDP/TCP & Allow & prime DNS \\
+		6 & 5 & 172.16.6.2 & 68 & 172.16.5.2 & 67 & UDP & Allow & DHCP \\
+		6 & 6 & Any & Any & Any & Any & Any & Deny & \\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 5 : Incoming rules}}\\
+		5 & 1 & Any & Any & Any & Any & Any & Deny & \\
+
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 5 : Outgoing rules}}\\
+		5 & 1 & 172.16.5.2 & 68 & 172.16.6.2 & 67 & DHCP & Allow & DHCP\\
+		5 & 2 & 172.16.5.3... & Any & 172.16.6.4 & 80 & TCP & Allow & HTTP \\
+		5 & 3 & 172.16.5.3... & Any & 172.16.6.4 & 443 & TCP & Allow & HTTPS \\
+		5 & 4 & 172.16.5.3... & Any & 172.16.6.3 & 22 & TCP & Allow & SSH \\
+		5 & 5 & 172.16.5.3... & Any & 172.16.9.2 & 873 & TCP & Allow & RSYNC \\
+		5 & 6 & 172.16.5.3... & Any & 172.16.6.5 & 53 & UDP/TCP & Allow & DNS (local) \\
+		5 & 7 & 172.16.5.3... & Any & 172.14.6.2 & Any & Any & Allow & Link to FW2 \\
+		5 & 8 & 172.16.5.3... & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP web server \\
+		5 & 9 & 172.16.5.3... & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS web server \\
+		5 & 10 & 172.16.5.3... & Any & 172.14.6.3 & 21 & TCP & Allow & FTP web server \\
+		5 & 11 & 172.16.5.3... & Any & 172.14.7.2 & Any & TCP & Allow & SMTP \\
+
+		5 & 12 & Any & Any & Any & Any & Any & Deny & \\
+
+
+	\end{tabular}
+	\caption{Firewall 2}
+\end{table}
 
 
 % ========================== FW3 ==========================
@@ -167,15 +188,16 @@ At FW3 :
 \end{itemize}
 
 \begin{landscape}
+	\thispagestyle{empty}
+	\vspace*{\fill}
 	\begin{table}[h]
 		\centering
-		%\small
+		\small
 		\begin{tabular}{c|c|cc|cc|ccl}
 			Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 			\hline
 			\multicolumn{9}{l}{\textbf{Zone 3 : Incoming rules}}\\
-			3 &  & 172.14.5.2 & 22 & 172.14.6.2 & 22 & TCP & Allow & SSH\\
-			3 &  & 172.14.3.10 & 22 & 172.14.6.2 & 22 & TCP & Allow & SSH from Internet\\
+			3 &  & 172.14.5.2 & 3003 & 172.16.4.2 & 22 & TCP & Allow & SSH\\
 			3 &  & 172.14.6.3 & 20 & 172.14.6.2 & Any & TCP & Allow & FTP (data)\\
 			3 &  & Any & Any & 172.16.4.2 & Any & Any & Deny & Deny otherwise\\
 
@@ -187,36 +209,29 @@ At FW3 :
 			3 &  & 172.16.4.2 & Any & 172.14.5.2 & 3128 & TCP & Allow & HTTP through FW2 (lynx) \\
 			3 &  & 172.16.4.2 & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & (P)DNS\\
 			3 &  & 172.16.4.2 & Any & 172.14.6.3 & 21/80 & TCP & Allow & Web\\
-			3 &  & 172.16.4.2 & Any & 172.14.7.2 & 25/110/995 & TCP & Allow & SMTP\\
+			3 &  & 172.16.4.2 & Any & 172.14.7.2 & 25 & TCP & Allow & SMTP\\
 			3 &  & 172.16.4.2 & Any & Any & Any & Any & Deny & Deny otherwise\\
 
 			\hline
 			\multicolumn{9}{l}{\textbf{Zone 2 : Incoming rules}}\\
-			2 &  & 172.14.5.2 & Any & 172.14.7.2 & 25/110/995 & TCP & Allow & SMTP from U2\\
-			2 &  & 172.14.3.10 & Any & 172.14.7.2 & 25/110/995 & TCP & Allow & SMTP from Internet\\
-			2 &  & 172.14.6.2 & Any & 172.14.7.2 & 25/110/995 & TCP & Allow & SMTP from I2\\
-			2 &  & Any & Any & 172.14.7.2 & Any & Any & Deny & Deny otherwise\\
+			2 &  & 172.14.5.2.2 & 3261 to 3514 & 172.14.6.2 & Any & TCP & Allow & SMTP from U2\\
+			2 &  & Any & Any & 172.14.6.2 & Any & Any & Deny & Deny otherwise\\
 
 			\hline
 			\multicolumn{9}{l}{\textbf{Zone 2 : Outgoing rules}}\\
-			2 &  & 172.14.7.2 & Any & 172.14.5.2 & 25/110/995 & TCP & Allow & SMTP can send to U2\\
-			2 &  & 172.14.7.2 & Any & 172.16.4.2 & 25/110/995 & TCP & Allow & SMTP can send to I2\\
-			2 &  & 172.14.7.2 & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & SMTP can ask to PDNS\\
-			2 &  & 172.14.7.2 & Any & Any & Any & Any & Deny & Deny requests from SMTP\\
+			2 &  & 172.14.6.2 & Any & Any & Any & Any & Deny & Deny requests from SMTP\\
 
 			\hline
 			\multicolumn{9}{l}{\textbf{Zone 1 : Incoming rules}}\\
-			1 &  & 172.14.6.2  & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP (web server) from I2\\
-			1 &  & 172.14.6.2  & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS (web server) from I2\\
-			1 &  & 172.14.6.2 & Any & 172.14.6.3 & 21 & TCP & Allow & FTP from I2\\
+			1 &  & Any & Any & 172.14.6.3 & 80 & TCP & Allow & HTTP (web server)\\
+			1 &  & Any & Any & 172.14.6.3 & 443 & TCP & Allow & HTTPS (web server)\\
+			1 &  & Any & Any & 172.14.6.3 & 21 & TCP & Allow & FTP\\
 			1 &  & Any & Any & 172.14.6.3 & Any & Any & Deny & Deny otherwise\\
 
 			\hline
 			\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
 			1 &  & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP (data)\\
 			1 &  & 172.14.6.3 & Any & Any & Any & Any & Deny & Deny otherwise\\
-			\multicolumn{9}{l}{\textbf{Default}}\\
-			 &  & Any & Any & Any & Any & Any & Deny & LOG and drop\\
 		\end{tabular}
 		\caption{Firewall 3}
 	\end{table}
@@ -227,42 +242,39 @@ At FW3 :
 
 % ========================== FW4 ==========================
 
-\begin{landscape}
-	\vspace*{\fill}
-	\begin{table}[h]
-		\center
-		\begin{tabular}{c|c|cc|cc|ccl}
-			Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 7 : Incoming rules}}\\
-			7 & 1 & 172.16.7.3 & 22 & 172.16.9.2 & 873 & TCP & Allow & SSH\\
-			7 & 2 & 172.16.8.0 & Any & 172.16.9.2 & 873 & TCP & Allow & \\
-			7 & 3 & Any & Any & Any & Any & Any & Deny & \\
+\begin{table}[h]
+	\center
+	\begin{tabular}{c|c|cc|cc|ccl}
+		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 7 : Incoming rules}}\\
+		7 & 1 & 172.16.7.3 & Any & 172.16.9.2 & 22 & TCP & Allow & SSH\\
+		7 & 2 & 172.16.8.0 & Any & 172.16.9.2 & 873 & TCP & Allow & \\
+		7 & 3 & Any & Any & Any & Any & Any & Deny & \\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 7 : Outgoing rules}}\\
+		7 & 1 & Any & Any & Any & Any & Any & Deny & \\
 
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 8 : Incoming rules}}\\
-			8 & 1 & 172.16.7.3 & 22 & 172.16.8.0 & 22 & TCP & Allow & SSH \\
-			8 & 2 & 172.16.6.1 & 3009 & 172.16.8.3... & Any & TCP & Allow & FTP \\
-			8 & 3 & Any & Any & Any & Any & Any & Deny & \\
-			\hline
-			\multicolumn{9}{l}{\textbf{Zone 8 : Outgoing rules}}\\
-			8 & 1 & 172.16.8.2 & 68 & 172.16.7.2 & 67 & DHCP & Allow & \\
-			8 & 2 & 172.16.8.3... & 80 & 172.16.7.4 & Any & TCP & Allow & HTTP \\
-			8 & 3 & 172.16.8.3... & 443 & 172.16.7.4 & Any & TCP & Allow & HTTPS \\
-			8 & 4 & 172.16.8.3... & 22 & 172.16.7.3 & Any & TCP & Allow & SSH \\
-			8 & 5 & 172.16.8.3... & 873 & 172.16.9.2 & Any & TCP & Allow & RSYNC \\
-			8 & 6 & 172.16.8.3... & 53 & 172.16.7.5 & Any & TCP & Allow & DNS (local) \\
-			8 & 7 & 172.16.8.3... & 80 & 172.14.6.3 & Any & TCP & Allow & HTTP \\
-			8 & 8 & 172.16.8.3... & 443 & 172.14.6.3 & Any & TCP & Allow & HTTPS \\
-			8 & 9 & 172.16.8.3... & Any & 172.14.6.3 & 20 & TCP & Allow & FTP \\
-			8 & 10 & Any & Any & Any & Any & Any & Deny & \\
-			\hline
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 8 : Incoming rules}}\\
+		8 & 1 & 172.16.7.2 & 68 &  172.16.8.2 & 67 & UDP & Allow & DHCP\\
+		8 & 2 & 172.16.7.3 & Any & 172.16.8.0 & 22 & TCP & Allow & SSH \\
+		8 & 3 & Any & Any & Any & Any & Any & Deny & \\
+		\hline
+		\multicolumn{9}{l}{\textbf{Zone 8 : Outgoing rules}}\\
+		8 & 1 & 172.16.8.2 & 68 & 172.16.7.2 & 67 & UDP & Allow & DHCP\\
+		8 & 2 & 172.16.8.3... & Any & 172.16.7.4 & 80 & TCP & Allow & HTTP \\
+		8 & 3 & 172.16.8.3... & Any & 172.16.7.4 & 3128 & TCP & Allow & HTTP for lynx\\
+		8 & 4 & 172.16.8.3... & Any & 172.16.7.4 & 443 & TCP & Allow & HTTPS \\
+		8 & 5 & 172.16.8.3... & Any & 172.16.7.3 & 22 & TCP & Allow & SSH \\
+		8 & 6 & 172.16.8.3... & Any & 172.16.9.2 & 873 & TCP & Allow & RSYNC \\
+		8 & 7 & 172.16.8.3... & Any & 172.16.7.5 & 53 & UDP & Allow & DNS (local) \\
+		8 & 8 & Any & Any & Any & Any & Any & Deny & \\
+		\hline
 
-		\end{tabular}
-		\caption{Firewall 4}
-	\end{table}
-	\vspace*{\fill}
-\end{landscape}
+	\end{tabular}
+	\caption{Firewall 4}
+\end{table}
 
 
 
