@@ -60,7 +60,3 @@ iptables -t filter -A FORWARD -j DROP
 
 iptables -t filter -A FORWARD -j LOG --log-prefix "[FORW] DROP : "
 iptables -t filter -A FORWARD -j DROP
-
-iptables -t filter -A INPUT -j DROP
-
-iptables -t filter -A OUTPUT -j DROP

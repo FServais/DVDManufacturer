@@ -21,8 +21,6 @@ iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 3128 --to-des
 iptables -t nat -A PREROUTING -j DNAT -p tcp -d 172.14.5.2 --dport 53 --to-destination 172.16.6.5
 
 
-
-
 #filter
 #zone 6 incoming
 
@@ -100,6 +98,8 @@ iptables -t filter -A FORWARD -p tcp -s 172.16.5.0/24 -d 172.14.7.2  -m state --
 iptables -t filter -A FORWARD -j LOG --log-prefix "[FORW] DROP : "
 iptables -t filter -A FORWARD -j DROP
 
+iptables -t filter -A INPUT -j LOG --log-prefix "[IN] DROP : "
 iptables -t filter -A INPUT -j DROP
 
-iptables -t filter -A OUTPUT -j DROP
+iptables -t filter -A OUTPUT -j LOG --log-prefix "[OUT] DROP : "
+iptables -t filter -A OUTPUT -j DROP#

@@ -13,8 +13,6 @@ iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# Allow ICMP
-iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -p icmp -j ACCEPT
 
 # *** Zone 4 : Incoming rules ***
 
