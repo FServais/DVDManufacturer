@@ -148,6 +148,7 @@ At FW3, the traffic arriving directly addressed to the firewall is forwarded to 
 		9 & 21 & Internet & Any & 172.14.7.2 & 25, 110, 995 & TCP & Allow & Internet to SMTP\\
 		9 & 22 & Internet & Any & Any & Any & Any & Deny & Deny otherwise\\
 
+		\hline
 		\multicolumn{9}{l}{\textbf{Deny by default}}\\
 		  & 23 & Any & Any & Any & Any & Any & Deny & Deny by default\\
 		\hline
@@ -208,7 +209,10 @@ At FW3, the traffic arriving directly addressed to the firewall is forwarded to 
 		5 & 33 & 172.16.5.3... & Any & 172.14.6.3 & 21 & TCP & Allow & FTP web server \\
 		5 & 34 & 172.16.5.3... & Any & 172.14.7.2 & Any & TCP & Allow & SMTP \\
 		5 & 35 & Any & Any & Any & Any & Any & Deny & \\
-
+		\hline
+		\multicolumn{9}{l}{\textbf{Deny by default}}\\
+		& 36 & Any & Any & Any & Any & Any & Deny & Deny by default\\
+		\hline
 
 	\end{tabular}
 	\caption{Firewall 2}
@@ -311,7 +315,9 @@ At FW3, the traffic arriving directly addressed to the firewall is forwarded to 
 		8 & 17 & 172.16.8.0 & Any & Any & Any & Any & Deny & \\
 		8 & 18 & Any & Any & Any & Any & Any & Deny & \\
 		\hline
-
+		\multicolumn{9}{l}{\textbf{Deny by default}}\\
+		  & 19 & Any & Any & Any & Any & Any & Deny & Deny by default\\
+		\hline
 	\end{tabular}
 	\caption{Firewall 4}
 \end{table}
