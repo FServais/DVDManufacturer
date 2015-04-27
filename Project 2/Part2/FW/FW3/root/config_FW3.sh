@@ -140,9 +140,3 @@ iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j DROP -s $WEB_I
 
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j LOG --log-prefix "[FORW] DROP : "
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j DROP
-
-iptables -t filter -A INPUT -j LOG --log-prefix "[IN] DROP : "
-iptables -t filter -A INPUT -j DROP
-
-iptables -t filter -A OUTPUT -j LOG --log-prefix "[OUT] DROP : "
-iptables -t filter -A OUTPUT -j DROP
