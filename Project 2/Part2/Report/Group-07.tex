@@ -86,6 +86,19 @@ One can order the zones by security level. From the highest security : zone 7, z
 \section{Rules}
 \label{sec:Rules}
 
+The rules for the firewalls are shown in \textsc{Table}'s 2 to 5.
+
+\paragraph{}
+
+At FW2 we configured the NAT table as follow :
+\begin{itemize}
+\item For outgoing traffic, we used MASQUERADE in order to have dynamic mappings.
+\item For incoming traffic, we based ourselves on the destination port. For example, the port 22 meant that the destination had to be replaced by SSH address with DNAT. Only the servers are available.
+\end{itemize}
+
+\paragraph{}
+
+At FW3, the traffic arriving directly addressed to the firewall is forwarded to I2 and the traffic that comes from I2 sees its ip address change thanks to MASQUERADE.
 
 
 % ========================== FW1 ==========================
@@ -120,7 +133,7 @@ One can order the zones by security level. From the highest security : zone 7, z
 
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 9 : Incoming rules}}\\
-		9 & 12 & 172.14.5.3 & Any & 208.67.222.222 & 53 & UDP/TCP & Allow & PDNS\\
+		9 & 12 & 172.14.5.3 & Any & 208.67.222.222 & 53 & UDP/TCP & Allow & To prime DNS)\\
 		9 & 13 & 172.14.5.2 & Any & Internet & Any & TCP/UDP & Allow & From FW2\\
 		9 & 14 & 172.14.7.2 & Any & Internet & 25, 110, 995 & TCP & Allow & SMTP to internet\\
 		9 & 15 & 172.14.6.2 & Any & Internet & Any & TCP & Allow & I2 to internet\\
@@ -142,16 +155,7 @@ One can order the zones by security level. From the highest security : zone 7, z
 	\caption{Firewall 1}
 \end{table}
 
-In "Zone 9 : Incoming rules", PDNS populates its cache, the rule is the same as in "Zone 4 : Outgoing".
-
 % ========================== FW2 ==========================
-
-At FW2 we configured the NAT table as follow :
-\begin{itemize}
-\item For outgoing traffic, we used MASQUERADE in order to have dynamic mappings.
-\item For incoming traffic, we based ourselves on the destination port. For example, the port 22 meant that the destination had to be replaced by SSH address with DNAT. Only the servers are available.
-\end{itemize}
-
 
 \begin{table}[h]
 	\center
