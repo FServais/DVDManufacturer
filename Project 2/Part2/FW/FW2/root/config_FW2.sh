@@ -100,8 +100,6 @@ iptables -t filter -A FORWARD -p tcp -s 172.16.5.0/24 -d 172.14.7.2  -m state --
 iptables -t filter -A FORWARD -j LOG --log-prefix "[FORW] DROP : "
 iptables -t filter -A FORWARD -j DROP
 
-iptables -t filter -A INPUT -j LOG --log-prefix "[IN] DROP : "
 iptables -t filter -A INPUT -j DROP
 
-iptables -t filter -A OUTPUT -j LOG --log-prefix "[OUT] DROP : "
-iptables -t filter -A OUTPUT -j DROP#
+iptables -t filter -A OUTPUT -j DROP
