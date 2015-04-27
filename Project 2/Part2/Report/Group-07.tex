@@ -258,8 +258,8 @@ At FW2 we configured the NAT table as follow :
 		Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 7 : Incoming rules}}\\
-		7 & 1 & 172.16.7.3 & Any & 172.16.9.2 & 22 & TCP & Allow & SSH\\
-		7 & 2 & 172.16.8.0 & Any & 172.16.9.2 & 873 & TCP & Allow & \\
+		7 & 1 & 172.16.7.3 & Any & 172.16.9.2 & 22 & TCP & Allow & RSYNC via SSH\\
+		7 & 2 & 172.16.8.0 & Any & 172.16.9.2 & 873 & TCP & Allow &  RSYNC\\
 		7 & 3 & Any & Any & 172.16.9.2 & Any & Any & Deny & \\
 		\hline
 		\multicolumn{9}{l}{\textbf{Zone 7 : Outgoing rules}}\\
