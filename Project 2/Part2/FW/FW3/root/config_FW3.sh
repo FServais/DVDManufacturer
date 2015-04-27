@@ -50,7 +50,7 @@ iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp 
 # Allow connection to HTTP
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $I2_PRIV_IP -d $FW2_IP --dport 80 # HTTP
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $I2_PRIV_IP -d $FW2_IP --dport 443 # HTTPS
-iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $I2_PRIV_IP -d $FW2_IP --dport 3128 # HTTP (lynx)
+iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p tcp -s $I2_PRIV_IP -d $FW2_IP --dport 3128 # Lynx
 
 # Allow connection to PDNS
 iptables -t filter -A FORWARD -m state --state NEW,ESTABLISHED -j ACCEPT -p udp -s $I2_PRIV_IP -d $PDNS_IP --dport 53
