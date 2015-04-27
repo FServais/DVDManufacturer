@@ -180,13 +180,6 @@ At FW2 we configured the NAT table as follow :
 
 % ========================== FW3 ==========================
 
-At FW3 :
-\begin{itemize}
-	\item Port 3001 : correspond to the requests from 172.16.4.2:25 (I2)
-	\item Port 3002 : correspond to the requests from 172.16.4.2:587 (I2)
-	\item Port 3003 : correspond to the requests from 172.16.4.2:465 (I2)
-\end{itemize}
-
 \begin{landscape}
 	\thispagestyle{empty}
 	\vspace*{\fill}
@@ -197,7 +190,7 @@ At FW3 :
 			Zone & Number & Source & Port & Dest & Port & Protocol & Action & \multicolumn{1}{c}{Comments}\\
 			\hline
 			\multicolumn{9}{l}{\textbf{Zone 3 : Incoming rules}}\\
-			3 &  & 172.14.5.2 & 3003 & 172.16.4.2 & 22 & TCP & Allow & SSH\\
+			3 &  & 172.14.5.2 & Any & 172.16.4.2 & 22 & TCP & Allow & SSH\\
 			3 &  & 172.14.6.3 & 20 & 172.14.6.2 & Any & TCP & Allow & FTP (data)\\
 			3 &  & Any & Any & 172.16.4.2 & Any & Any & Deny & Deny otherwise\\
 
