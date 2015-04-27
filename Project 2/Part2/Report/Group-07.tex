@@ -108,7 +108,7 @@
 			1 &  & 172.14.6.2 & Any & 172.14.6.3 & 21 & TCP & Allow & FTP from network (FW3)\\
 			1 &  & Any & Any & 172.14.6.3 & Any & Any & Deny & Deny otherwise\\
 
-			\hline 
+			\hline
 			\multicolumn{9}{l}{\textbf{Zone 1 : Outgoing rules}}\\
 			1 &  & 172.14.6.3 & 20 & Any & Any & TCP & Allow & FTP data\\
 			1 &  & 172.14.6.3 & Any & Any & Any & Any & Deny & Deny otherwise\\
@@ -184,6 +184,7 @@ At FW3 :
 			3 &  & 172.16.4.2 & Any & 172.14.5.2 & 22 & TCP & Allow & SSH through FW2\\
 			3 &  & 172.16.4.2 & Any & 172.14.5.2 & 80 & TCP & Allow & HTTP through FW2\\
 			3 &  & 172.16.4.2 & Any & 172.14.5.2 & 443 & TCP & Allow & HTTPS through FW2\\
+			3 &  & 172.16.4.2 & Any & 172.14.5.2 & 3128 & TCP & Allow & HTTP through FW2 (lynx) \\
 			3 &  & 172.16.4.2 & Any & 172.14.5.3 & 53 & UDP/TCP & Allow & (P)DNS\\
 			3 &  & 172.16.4.2 & Any & 172.14.6.3 & 21/80 & TCP & Allow & Web\\
 			3 &  & 172.16.4.2 & Any & 172.14.7.2 & 25/110/995 & TCP & Allow & SMTP\\
